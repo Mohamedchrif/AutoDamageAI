@@ -1,0 +1,94 @@
+<?php
+require_once 'config.php';
+
+if (is_logged_in()) {
+    header("Location: dashboard.php");
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    $stmt = $pdo->prepare("SELECT id, password_hash FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password_hash'])) {
+        // Login success
+        $_SESSION['user_id'] = $user['id'];
+        header("Location: dashboard.php");
+        exit;
+    } else {
+        set_flash_message('danger', 'Please check your login details and try again.');
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoDamg | Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-image">
+            <h1>Professional Damage Analysis</h1>
+            <p>Our AI system analyzes vehicle damage with extreme precision, providing expert insights for repair estimates.</p>
+        </div>
+        <div class="auth-content">
+            <div class="login-card">
+                <div class="login-header">
+                    <a href="home.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
+                        <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
+                    </a>
+                    <h2>Welcome Back</h2>
+                    <p style="color: var(--text-secondary); margin-top: 0.5rem;">Sign in to access your dashboard</p>
+                </div>
+
+                <?php display_flash_messages(); ?>
+
+                <form method="POST" action="login.php">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" name="email" class="form-control" placeholder="name@company.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper password-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="Toggle password visibility">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="remember" name="remember" style="width: 1rem; height: 1rem;">
+                            <label for="remember" style="margin-bottom: 0; font-size: 0.875rem; cursor: pointer;">Remember me</label>
+                        </div>
+                        <a href="#" style="font-size: 0.875rem; color: var(--secondary-color); text-decoration: none; font-weight: 500;">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Login to Account</button>
+                </form>
+
+                <div class="footer-text">
+                    Don't have an account? <a href="signup.php">Join the platform</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="js/auth.js"></script>
+</body>
+</html>

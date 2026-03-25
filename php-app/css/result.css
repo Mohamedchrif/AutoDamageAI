@@ -1,0 +1,472 @@
+        body { background: #f1f5f9; }
+
+        /* === Navbar === */
+        .app-nav {
+            background: var(--primary-color);
+            padding: 1.25rem 3rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .app-nav a { color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s; }
+        .app-nav a:hover { color: white; }
+        .btn-nav { background: var(--secondary-color); color: white !important; padding: 0.625rem 1.25rem; border-radius: 0.625rem; }
+
+        /* === Page Structure === */
+        .result-container { max-width: 1280px; margin: 0 auto; padding: 3rem 2rem; }
+
+        /* === Header Banner === */
+        .result-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1e3a5f 60%, var(--secondary-color) 100%);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .header-left h1 { font-size: 2rem; color: white; margin-bottom: 0.5rem; font-weight: 800; }
+        .header-meta { display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap; }
+        .meta-item { display: flex; flex-direction: column; }
+        .meta-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.6); font-weight: 700; }
+        .meta-val { font-size: 1rem; font-weight: 600; color: white; margin-top: 0.2rem; }
+
+        /* === Cost Estimate Banner === */
+        .cost-banner {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem 3rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        .cost-banner-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .cost-range {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 900;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+        .cost-range span { color: var(--secondary-color); }
+        .cost-note { font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem; }
+        .cost-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn-primary { background: var(--secondary-color); color: white; text-decoration: none; padding: 0.875rem 2rem; border-radius: 0.875rem; font-weight: 700; display: flex; align-items: center; gap: 0.6rem; transition: all 0.2s; border: none; cursor: pointer; font-size: 0.95rem; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
+        .btn-outline { background: white; color: var(--primary-color); text-decoration: none; padding: 0.875rem 2rem; border-radius: 0.875rem; font-weight: 700; display: flex; align-items: center; gap: 0.6rem; border: 2px solid var(--border-color); transition: all 0.2s; font-size: 0.95rem; }
+        .btn-outline:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+
+        /* === Two-column layout === */
+        .grid-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem; }
+        @media (max-width: 900px) { .grid-two-col { grid-template-columns: 1fr; } }
+
+        /* === Annotated Image Card === */
+        .image-card {
+            background: white;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+        }
+        .image-card-header {
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1rem; font-weight: 700; color: var(--primary-color);
+        }
+        .image-card-header i { color: var(--secondary-color); }
+        .annotated-img { width: 100%; display: block; max-height: 480px; object-fit: contain; background: #0f172a; }
+
+        /* === Damage Summary Card === */
+        .summary-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+        .summary-card-header {
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1rem; font-weight: 700; color: var(--primary-color);
+        }
+        .summary-card-header i { color: var(--secondary-color); }
+        .severity-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 2rem;
+            gap: 1rem;
+        }
+        .sev-block { text-align: center; }
+        .sev-num { font-size: 2.5rem; font-weight: 900; line-height: 1; }
+        .sev-num.major { color: var(--danger-color); }
+        .sev-num.moderate { color: var(--warning-color); }
+        .sev-num.minor { color: var(--success-color); }
+        .sev-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 0.4rem; }
+
+        /* === No Damage State === */
+        .no-damage {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 5rem 3rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #d1fae5;
+            margin-bottom: 2.5rem;
+        }
+        .no-damage-icon {
+            width: 100px; height: 100px;
+            background: #d1fae5;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 2.5rem; color: var(--success-color);
+        }
+
+        /* === Damage Detail Cards === */
+        .damage-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+        .damage-card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .damage-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .damage-card-top {
+            padding: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+        }
+        .damage-card-sev-icon {
+            width: 52px; height: 52px;
+            border-radius: 0.875rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.35rem; flex-shrink: 0;
+        }
+        .icon-major { background: #fee2e2; color: var(--danger-color); }
+        .icon-moderate { background: #fef9c3; color: var(--warning-color); }
+        .icon-minor { background: #d1fae5; color: var(--success-color); }
+        .damage-card-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.3rem; }
+        .damage-card-class { font-size: 0.85rem; color: var(--text-secondary); }
+        .damage-card-body {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: #f8fafc;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .detail-item .detail-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 0.25rem; }
+        .detail-item .detail-val { font-size: 0.95rem; font-weight: 700; color: var(--primary-color); }
+        .confidence-bar { background: #e2e8f0; border-radius: 99px; height: 6px; margin-top: 0.75rem; overflow: hidden; }
+        .confidence-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); transition: width 1s ease; width: var(--conf, 0%); }
+        .cost-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #eff6ff;
+            color: var(--secondary-color);
+            padding: 0.4rem 0.875rem;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            width: 100%;
+        }
+        body { background: #f1f5f9; }
+
+        /* === Navbar === */
+        .app-nav {
+            background: var(--primary-color);
+            padding: 1.25rem 3rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .app-nav a { color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s; }
+        .app-nav a:hover { color: white; }
+        .btn-nav { background: var(--secondary-color); color: white !important; padding: 0.625rem 1.25rem; border-radius: 0.625rem; }
+
+        /* === Page Structure === */
+        .result-container { max-width: 1280px; margin: 0 auto; padding: 3rem 2rem; }
+
+        /* === Header Banner === */
+        .result-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1e3a5f 60%, var(--secondary-color) 100%);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .header-left h1 { font-size: 2rem; color: white; margin-bottom: 0.5rem; font-weight: 800; }
+        .header-meta { display: flex; gap: 2rem; margin-top: 1rem; flex-wrap: wrap; }
+        .meta-item { display: flex; flex-direction: column; }
+        .meta-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.6); font-weight: 700; }
+        .meta-val { font-size: 1rem; font-weight: 600; color: white; margin-top: 0.2rem; }
+
+        /* === Cost Estimate Banner === */
+        .cost-banner {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem 3rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        .cost-banner-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .cost-range {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 900;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+        .cost-range span { color: var(--secondary-color); }
+        .cost-note { font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem; }
+        .cost-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn-primary { background: var(--secondary-color); color: white; text-decoration: none; padding: 0.875rem 2rem; border-radius: 0.875rem; font-weight: 700; display: flex; align-items: center; gap: 0.6rem; transition: all 0.2s; border: none; cursor: pointer; font-size: 0.95rem; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
+        .btn-outline { background: white; color: var(--primary-color); text-decoration: none; padding: 0.875rem 2rem; border-radius: 0.875rem; font-weight: 700; display: flex; align-items: center; gap: 0.6rem; border: 2px solid var(--border-color); transition: all 0.2s; font-size: 0.95rem; }
+        .btn-outline:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+
+        /* === Two-column layout === */
+        .grid-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem; }
+        @media (max-width: 900px) { .grid-two-col { grid-template-columns: 1fr; } }
+
+        /* === Annotated Image Card === */
+        .image-card {
+            background: white;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+        }
+        .image-card-header {
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1rem; font-weight: 700; color: var(--primary-color);
+        }
+        .image-card-header i { color: var(--secondary-color); }
+        .annotated-img { width: 100%; display: block; max-height: 480px; object-fit: contain; background: #0f172a; }
+
+        /* === Damage Summary Card === */
+        .summary-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+        .summary-card-header {
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1rem; font-weight: 700; color: var(--primary-color);
+        }
+        .summary-card-header i { color: var(--secondary-color); }
+        .severity-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 2rem;
+            gap: 1rem;
+        }
+        .sev-block { text-align: center; }
+        .sev-num { font-size: 2.5rem; font-weight: 900; line-height: 1; }
+        .sev-num.major { color: var(--danger-color); }
+        .sev-num.moderate { color: var(--warning-color); }
+        .sev-num.minor { color: var(--success-color); }
+        .sev-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 0.4rem; }
+
+        /* === No Damage State === */
+        .no-damage {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 5rem 3rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #d1fae5;
+            margin-bottom: 2.5rem;
+        }
+        .no-damage-icon {
+            width: 100px; height: 100px;
+            background: #d1fae5;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 2.5rem; color: var(--success-color);
+        }
+
+        /* === Damage Detail Cards === */
+        .damage-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+        .damage-card {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .damage-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .damage-card-top {
+            padding: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+        }
+        .damage-card-sev-icon {
+            width: 52px; height: 52px;
+            border-radius: 0.875rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.35rem; flex-shrink: 0;
+        }
+        .icon-major { background: #fee2e2; color: var(--danger-color); }
+        .icon-moderate { background: #fef9c3; color: var(--warning-color); }
+        .icon-minor { background: #d1fae5; color: var(--success-color); }
+        .damage-card-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.3rem; }
+        .damage-card-class { font-size: 0.85rem; color: var(--text-secondary); }
+        .damage-card-body {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: #f8fafc;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .detail-item .detail-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 0.25rem; }
+        .detail-item .detail-val { font-size: 0.95rem; font-weight: 700; color: var(--primary-color); }
+        .confidence-bar { background: #e2e8f0; border-radius: 99px; height: 6px; margin-top: 0.75rem; overflow: hidden; }
+        .confidence-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--secondary-color), var(--accent-color)); transition: width 1s ease; width: var(--conf, 0%); }
+        .cost-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #eff6ff;
+            color: var(--secondary-color);
+            padding: 0.4rem 0.875rem;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            width: 100%;
+        }
+        .badge-major { background: #fee2e2; color: var(--danger-color); }
+        .badge-moderate { background: #fef9c3; color: #92400e; }
+        .badge-minor { background: #d1fae5; color: #065f46; }
+
+/* === Mobile Responsiveness === */
+@media (max-width: 768px) {
+  .result-container {
+    padding: 0; 
+  }
+  .result-header {
+    padding: 1.5rem 1rem;
+    border-radius: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .cost-banner {
+    padding: 1.5rem 1rem;
+    border-radius: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: none;
+    border-right: none;
+  }
+  .cost-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .btn-primary, .btn-outline {
+    width: 100% !important;
+    justify-content: center;
+    padding: 1.25rem 1rem !important; /* Thick padding for touch */
+  }
+  .image-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  .image-card-header {
+    padding: 1rem;
+  }
+  .summary-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  .annotated-img {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    object-fit: contain !important;
+  }
+  .grid-two-col {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+  }
+  .severity-row {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+  .severity-row > div[style*="width:1px"] {
+    display: none; /* Hide vertical dividers on mobile */
+  }
+  .damage-cards-grid {
+    grid-template-columns: 1fr;
+    padding: 0 1rem;
+  }
+  .damage-card-body {
+    grid-template-columns: 1fr; /* Stack costs and detection zones */
+  }
+  .app-nav {
+    flex-direction: column;
+    padding: 1.25rem 1rem;
+    gap: 1.25rem;
+    align-items: center;
+  }
+  .app-nav > div {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    gap: 1rem;
+  }
+  .app-nav .btn-nav {
+    width: 100%;
+    text-align: center;
+  }
+}

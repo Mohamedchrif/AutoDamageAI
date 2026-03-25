@@ -1,0 +1,76 @@
+.flash-msg { padding: 1rem 1.25rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem; }
+.flash-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.flash-danger { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.flash-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+
+/* Profile Layouts */
+.profile-banner-avatar {
+    position: absolute;
+    bottom: -50px;
+    left: 3.5rem;
+}
+.profile-content {
+    padding: 5rem 3.5rem 3.5rem 3.5rem;
+}
+.profile-header-view {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 3.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+.profile-edit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+.danger-card-inner {
+    border: 2px solid #fee2e2;
+    background: white;
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.05);
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+/* Profile Mobile Resets */
+@media (max-width: 768px) {
+    .profile-banner-avatar {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .profile-content {
+        padding: 5rem 1.25rem 2rem 1.25rem !important; /* Overrides inline style if perfectly needed, though we will remove them */
+    }
+    .profile-header-view {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .profile-grid, .profile-edit-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .danger-card-inner {
+        padding: 1.5rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    .danger-card-inner > div {
+        flex-direction: column;
+        text-align: center;
+    }
+}
