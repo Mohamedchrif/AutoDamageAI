@@ -90,6 +90,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
     exit;
 }
 
+// Password Change Handler
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
+    $current_pwd = $_POST['current_password'];
+    $new_pwd = $_POST['new_password'];
+    $confirm_pwd = $_POST['confirm_password'];
+    
+    $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $db_pass = $stmt->fetchColumn();
+    
+    if ($db_pass && password_verify($current_pwd, $db_pass)) {
+        if ($new_pwd === $confirm_pwd) {
+            if (strlen($new_pwd) >= 8) {
+                $hash = password_hash($new_pwd, PASSWORD_DEFAULT);
+                $update_stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+                if ($update_stmt->execute([$hash, $_SESSION['user_id']])) {
+                    set_flash_message('success', 'Your password has been successfully changed! Security score increased.');
+                } else {
+                    set_flash_message('danger', 'System error occurred while updating the password.');
+                }
+            } else {
+                set_flash_message('danger', 'The new password must be at least 8 characters long.');
+            }
+        } else {
+            set_flash_message('danger', 'New passwords do not match!');
+        }
+    } else {
+        set_flash_message('danger', 'Current password is incorrect! Action blocked.');
+    }
+    header("Location: profile.php");
+    exit;
+}
+
 // Additional check for account deletion POST route could be handled here or separate script
 if (isset($_POST['delete_account'])) {
     $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
@@ -281,11 +314,55 @@ if (isset($_POST['delete_account'])) {
                                 </div>
                             </div>
                             <div class="edit-actions">
-                                <button type="submit" class="submit-btn" style="width: 160px; height: 48px; box-sizing: border-box; border: 2px solid transparent; padding: 0; margin: 0; border-radius: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <button type="submit" class="submit-btn" style="width: 170px; height: 48px; box-sizing: border-box; border: 2px solid transparent; padding: 0; margin: 0; border-radius: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                                     <i class="fas fa-save"></i> Save Changes
                                 </button>
-                                <button type="button" onclick="toggleEditMode()" class="btn-cancel" style="width: 160px; height: 48px; box-sizing: border-box; padding: 0; margin: 0; border-radius: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center;">
+                                <button type="button" onclick="toggleEditMode()" class="btn-cancel" style="width: 170px; height: 48px; box-sizing: border-box; padding: 0; margin: 0; border-radius: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center;">
                                     Cancel
+                                </button>
+                            </div>
+                        </form>
+
+                        <hr style="margin: 3.5rem 0 2.5rem 0; border: none; border-top: 2px dashed #e2e8f0;">
+
+                        <div style="margin-bottom: 2rem;">
+                            <h2 style="margin: 0; font-size: 1.65rem; font-weight: 800; color: var(--primary-color); display: flex; align-items: center; gap: 0.75rem;">
+                                <i class="fas fa-key" style="color: var(--secondary-color);"></i> Change Password
+                            </h2>
+                            <p style="color: var(--text-secondary); margin-top: 0.4rem;">Ensure your account is using a secure, random password.</p>
+                        </div>
+                        
+                        <form action="profile.php" method="POST">
+                            <input type="hidden" name="change_password" value="1">
+                            
+                            <div class="profile-edit-grid" style="margin-bottom: 1.5rem;">
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Current Password</label>
+                                    <div class="input-with-icon" style="position: relative;">
+                                        <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+                                        <input type="password" name="current_password" class="form-input" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">New Password</label>
+                                    <div class="input-with-icon" style="position: relative;">
+                                        <i class="fas fa-shield-alt" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+                                        <input type="password" name="new_password" class="form-input" minlength="8" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Confirm New Password</label>
+                                    <div class="input-with-icon" style="position: relative;">
+                                        <i class="fas fa-check" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+                                        <input type="password" name="confirm_password" class="form-input" minlength="8" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="edit-actions" style="margin-top: 2rem;">
+                                <button type="submit" class="submit-btn" style="width: 170px; height: 48px; box-sizing: border-box; border: 2px solid transparent; padding: 0; margin: 0; border-radius: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--secondary-color);">
+                                    <i class="fas fa-lock"></i> Update Password
                                 </button>
                             </div>
                         </form>

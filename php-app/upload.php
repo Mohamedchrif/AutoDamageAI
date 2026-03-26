@@ -42,7 +42,8 @@ $curlError = curl_error($ch);
 curl_close($ch);
 
 if ($response === false || $httpCode !== 200) {
-    echo json_encode(["error" => "Failed to reach AI service.", "details" => $curlError, "http_code" => $httpCode]);
+    $friendlyError = "Our AI engines are currently offline or unreachable. Please try again later.";
+    echo json_encode(["error" => $friendlyError, "details" => $curlError, "http_code" => $httpCode]);
     exit;
 }
 
@@ -54,12 +55,21 @@ if (!$resultData || !isset($resultData['success'])) {
     exit;
 }
 
+// ─── Save Original Image for Before & After Slider ─────────────
+$uploadDir = 'assets/uploads/';
+if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+// Safely copy temporary file
+$originalPath = $uploadDir . 'orig_' . time() . '_' . rand(1000, 9999) . '.jpg';
+copy($fileTmpPath, $originalPath);
+$resultData['original_image'] = $originalPath;
+$jsonToDB = json_encode($resultData);
+
 // ─── Save to Database ─────────────────────────────────────────
 $userId = $_SESSION['user_id'] ?? null;
 
 try {
     $stmt = $pdo->prepare("INSERT INTO analyses (user_id, filename, result_json) VALUES (?, ?, ?)");
-    $stmt->execute([$userId, $fileName, $response]);
+    $stmt->execute([$userId, $fileName, $jsonToDB]);
     $analysisId = $pdo->lastInsertId();
     $resultData['redirect'] = "result.php?id=" . $analysisId;
     echo json_encode($resultData);

@@ -3,16 +3,40 @@ require_once 'config.php';
 require_login();
 $user = get_current_user_data($pdo);
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_analysis_id'])) {
+    $del_id = $_POST['delete_analysis_id'];
+    $del_stmt = $pdo->prepare("DELETE FROM analyses WHERE id = ? AND user_id = ?");
+    $del_stmt->execute([$del_id, $user['id']]);
+    set_flash_message('success', 'Analysis record deleted successfully.');
+    header("Location: dashboard.php");
+    exit;
+}
+
+// Pagination logic
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$per_page = 10;
+$offset = ($page - 1) * $per_page;
+
+$total_stmt = $pdo->prepare("SELECT COUNT(*) FROM analyses WHERE user_id = ?");
+$total_stmt->execute([$user['id']]);
+$total_analyses = $total_stmt->fetchColumn();
+$total_pages = ceil($total_analyses / $per_page);
+
 // Fetch recent analyses for the current user
-$stmt = $pdo->prepare("SELECT * FROM analyses WHERE user_id = ? ORDER BY timestamp DESC LIMIT 10");
-$stmt->execute([$user['id']]);
+$stmt = $pdo->prepare("SELECT * FROM analyses WHERE user_id = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?");
+$stmt->bindValue(1, $user['id'], PDO::PARAM_INT);
+$stmt->bindValue(2, $per_page, PDO::PARAM_INT);
+$stmt->bindValue(3, $offset, PDO::PARAM_INT);
+$stmt->execute();
 $analyses = $stmt->fetchAll();
 
 // Process high severity count
 $high_count = 0;
 foreach ($analyses as &$a) {
     if (!empty($a['result_json'])) {
-        $a['result'] = json_decode($a['result_json'], true);
+        $decoded = json_decode($a['result_json'], true);
+        $a['result'] = $decoded ? $decoded : ['total_detections' => 0];
         if (isset($a['result']['total_detections']) && $a['result']['total_detections'] > 5) {
             $high_count++;
         }
@@ -65,6 +89,8 @@ unset($a);
                 </a>
             </header>
 
+            <?php display_flash_messages(); ?>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Total Inspections</h3>
@@ -86,8 +112,8 @@ unset($a);
 
             <div class="history-table-card">
                 <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: white;">
-                    <h2 style="font-size: 1.25rem; margin: 0;">Recent Inspection History</h2>
-                    <div style="font-size: 0.875rem; color: var(--text-secondary);">Showing last <?= count($analyses) ?> entries</div>
+                    <h2 style="font-size: 1.25rem; margin: 0;">Inspection History</h2>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary);">Total <?= $total_analyses ?> entries</div>
                 </div>
                 
                 <div class="table-responsive">
@@ -108,19 +134,28 @@ unset($a);
                                         <td style="font-weight: 500;" data-label="Date & Time"><?= date('M d, Y • H:i', strtotime($analysis['timestamp'])) ?></td>
                                         <td style="color: var(--text-secondary);" data-label="File Name"><?= htmlspecialchars($analysis['filename']) ?></td>
                                         <td data-label="Findings">
-                                            <span style="font-weight: 700; color: var(--primary-color);"><?= $analysis['result']['total_detections'] ?></span> detections
+                                            <span style="font-weight: 700; color: var(--primary-color);"><?= $analysis['result']['total_detections'] ?? 0 ?></span> detections
                                         </td>
                                         <td data-label="Severity Status">
-                                            <?php if ($analysis['result']['total_detections'] > 5): ?>
+                                            <?php $det = $analysis['result']['total_detections'] ?? 0; ?>
+                                            <?php if ($det > 5): ?>
                                                 <span class="status-badge status-major"><i class="fas fa-exclamation-triangle"></i> Major Damage</span>
-                                            <?php elseif ($analysis['result']['total_detections'] > 0): ?>
+                                            <?php elseif ($det > 0): ?>
                                                 <span class="status-badge status-moderate"><i class="fas fa-info-circle"></i> Moderate</span>
                                             <?php else: ?>
                                                 <span class="status-badge status-clear"><i class="fas fa-check"></i> Clear</span>
                                             <?php endif; ?>
                                         </td>
                                         <td style="text-align: right;" data-label="Actions">
-                                            <a href="result.php?id=<?= $analysis['id'] ?>" class="action-link"><i class="fas fa-file-alt"></i> Report</a>
+                                            <div style="display: flex; gap: 1rem; justify-content: flex-end; align-items: center;">
+                                                <a href="result.php?id=<?= $analysis['id'] ?>" class="action-link"><i class="fas fa-file-alt"></i> Report</a>
+                                                <form method="POST" action="dashboard.php" style="margin:0; display:inline;" onsubmit="return confirm('Are you sure you want to permanently delete this report?');">
+                                                    <input type="hidden" name="delete_analysis_id" value="<?= $analysis['id'] ?>">
+                                                    <button type="submit" style="background:none; border:none; color:var(--danger-color); cursor:pointer; font-size:1.1rem; padding:0.25rem;" title="Delete">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -139,6 +174,24 @@ unset($a);
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Pagination Controls -->
+                <?php if ($total_pages > 1): ?>
+                <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; gap: 0.75rem; background: white;">
+                    <?php if ($page > 1): ?>
+                    <a href="?page=<?= $page - 1 ?>" class="submit-btn" style="width: auto; margin:0; padding: 0.6rem 1rem; border-radius: 0.5rem; background: #f8fafc; color: var(--text-primary); border: 1px solid var(--border-color);"><i class="fas fa-chevron-left"></i> Prev</a>
+                    <?php endif; ?>
+                    
+                    <span style="font-weight: 600; color: var(--text-secondary); padding: 0 0.5rem; font-size: 0.95rem;">
+                        Page <?= $page ?> of <?= $total_pages ?>
+                    </span>
+                    
+                    <?php if ($page < $total_pages): ?>
+                    <a href="?page=<?= $page + 1 ?>" class="submit-btn" style="width: auto; margin:0; padding: 0.6rem 1rem; border-radius: 0.5rem; background: #f8fafc; color: var(--text-primary); border: 1px solid var(--border-color);">Next <i class="fas fa-chevron-right"></i></a>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
             </div>
         </main>
     </div>
