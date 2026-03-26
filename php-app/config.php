@@ -76,7 +76,7 @@ function require_login() {
  */
 function get_current_user_data($pdo) {
     if (!is_logged_in()) return null;
-    $stmt = $pdo->prepare("SELECT id, username, email, phone FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, username, email, phone, profile_picture FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     return $stmt->fetch();
 }
