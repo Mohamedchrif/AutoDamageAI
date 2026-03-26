@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once 'config.php';
 // Index is the "New Analysis" page.
 // We can allow either guests or require login. The original Flask app required login for `/app`.
@@ -11,6 +11,7 @@ require_login();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoDamg | Vehicle Damage Analysis</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/index.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -34,6 +35,7 @@ require_login();
             <nav>
                 <ul class="nav-links" id="navLinks">
                     <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                    <li><a href="analytics.php"><i class="fas fa-chart-line"></i> Analytics</a></li>
                     <li><a href="index.php" class="active"><i class="fas fa-plus"></i> New Analysis</a></li>
                     <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
                     <li><a href="logout.php" class="nav-cta" style="color: white !important;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>

@@ -26,15 +26,16 @@ header {
 nav ul {
     display: flex;
     list-style: none;
-    gap: 2.2rem;
+    gap: 1.5rem;
+    align-items: center;
 }
 
 nav a {
     color: var(--light-text);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 0.95rem;
     transition: all 0.3s ease;
-    padding: 0.5rem 0;
     position: relative;
     display: flex;
     align-items: center;

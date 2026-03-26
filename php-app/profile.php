@@ -147,6 +147,7 @@ if (isset($_POST['delete_account'])) {
     <title>AutoDamg | Profile Settings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/profile.css">
 </head>
@@ -165,7 +166,8 @@ if (isset($_POST['delete_account'])) {
                 <nav>
                     <ul class="nav-links" id="navLinks">
                         <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                        <li><a href="index.php"><i class="fas fa-plus"></i> New Analysis</a></li>
+                    <li><a href="analytics.php"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                    <li><a href="index.php"><i class="fas fa-plus"></i> New Analysis</a></li>
                         <li><a href="profile.php" class="active"><i class="fas fa-user"></i> Profile</a></li>
                         <li><a href="logout.php" class="nav-cta" style="color: white !important;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                     </ul>
