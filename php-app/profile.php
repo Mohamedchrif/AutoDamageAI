@@ -24,6 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
             } else {
                 $profile_picture = $user['profile_picture'] ?? null;
                 $upload_ok = true;
+                $uploadFileDir = __DIR__ . '/assets/profiles/';
+                
+                // Ensure the upload directory exists
+                if (!is_dir($uploadFileDir)) {
+                    mkdir($uploadFileDir, 0775, true);
+                }
 
                 if (!empty($_POST['cropped_image'])) {
                     // Instagram-style cropped image (Base64)
@@ -33,14 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
                     $data = base64_decode($data);
                     
                     $newFileName = 'user_' . $_SESSION['user_id'] . '_' . time() . '.png';
-                    $uploadFileDir = 'assets/profiles/';
-                    $dest_path = $uploadFileDir . $newFileName;
+                    $dest_path_absolute = $uploadFileDir . $newFileName;
+                    $dest_path_relative = 'assets/profiles/' . $newFileName;
                     
-                    if (file_put_contents($dest_path, $data)) {
-                        if (!empty($user['profile_picture']) && file_exists($user['profile_picture'])) {
-                            unlink($user['profile_picture']);
+                    if (file_put_contents($dest_path_absolute, $data)) {
+                        if (!empty($user['profile_picture'])) {
+                            $old_abs = __DIR__ . '/' . $user['profile_picture'];
+                            if (file_exists($old_abs)) unlink($old_abs);
                         }
-                        $profile_picture = $dest_path;
+                        $profile_picture = $dest_path_relative;
                     } else {
                         $upload_ok = false;
                         set_flash_message('danger', 'Error saving the cropped profile picture.');
@@ -55,14 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
                     $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg', 'webp');
                     if (in_array($fileExtension, $allowedfileExtensions)) {
                         $newFileName = 'user_' . $_SESSION['user_id'] . '_' . time() . '.' . $fileExtension;
-                        $uploadFileDir = 'assets/profiles/';
-                        $dest_path = $uploadFileDir . $newFileName;
+                        $dest_path_absolute = $uploadFileDir . $newFileName;
+                        $dest_path_relative = 'assets/profiles/' . $newFileName;
                         
-                        if (move_uploaded_file($fileTmpPath, $dest_path)) {
-                            if (!empty($user['profile_picture']) && file_exists($user['profile_picture'])) {
-                                unlink($user['profile_picture']);
+                        if (move_uploaded_file($fileTmpPath, $dest_path_absolute)) {
+                            if (!empty($user['profile_picture'])) {
+                                $old_abs = __DIR__ . '/' . $user['profile_picture'];
+                                if (file_exists($old_abs)) unlink($old_abs);
                             }
-                            $profile_picture = $dest_path;
+                            $profile_picture = $dest_path_relative;
                         } else {
                             $upload_ok = false;
                             set_flash_message('danger', 'Error moving the uploaded file.');
@@ -96,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     $new_pwd = $_POST['new_password'];
     $confirm_pwd = $_POST['confirm_password'];
     
-    $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT password_hash FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $db_pass = $stmt->fetchColumn();
     
@@ -104,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
         if ($new_pwd === $confirm_pwd) {
             if (strlen($new_pwd) >= 8) {
                 $hash = password_hash($new_pwd, PASSWORD_DEFAULT);
-                $update_stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+                $update_stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
                 if ($update_stmt->execute([$hash, $_SESSION['user_id']])) {
                     set_flash_message('success', 'Your password has been successfully changed! Security score increased.');
                 } else {

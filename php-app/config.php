@@ -37,9 +37,16 @@ try {
             email VARCHAR(120) NOT NULL UNIQUE,
             phone VARCHAR(30) DEFAULT NULL,
             password_hash VARCHAR(256) NOT NULL,
+            profile_picture VARCHAR(255) DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB
     ");
+    // Ensure profile_picture column exists on older tables
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN profile_picture VARCHAR(255) DEFAULT NULL AFTER password_hash");
+    } catch (PDOException $e) {
+        // Column already exists — ignore
+    }
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS analyses (
             id INT AUTO_INCREMENT PRIMARY KEY,
