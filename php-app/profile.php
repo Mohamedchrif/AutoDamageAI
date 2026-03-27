@@ -415,59 +415,6 @@ if (isset($_POST['delete_account'])) {
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <script>
-        let cropper = null;
-        const imageToCrop = document.getElementById('image-to-crop');
-        const fileInput = document.getElementById('profile_picture_input');
-        const croppedInput = document.getElementById('cropped_image_base64');
-        const cropModal = document.getElementById('crop-modal');
-
-        fileInput.addEventListener('change', function(e) {
-            const files = e.target.files;
-            if (files && files.length > 0) {
-                const file = files[0];
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    imageToCrop.src = event.target.result;
-                    cropModal.style.display = 'flex';
-                    if (cropper) cropper.destroy();
-                    cropper = new Cropper(imageToCrop, {
-                        aspectRatio: 1, // 1:1 square ratio
-                        viewMode: 1,
-                        dragMode: 'move',
-                        autoCropArea: 0.9,
-                        restore: false,
-                        guides: true,
-                        center: true,
-                        highlight: false,
-                        cropBoxMovable: true,
-                        cropBoxResizable: true,
-                        toggleDragModeOnDblclick: false,
-                    });
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function cancelCrop() {
-            cropModal.style.display = 'none';
-            if (cropper) cropper.destroy();
-            fileInput.value = ''; 
-        }
-
-        function applyCrop() {
-            if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas({
-                width: 300,
-                height: 300,
-            });
-            croppedInput.value = canvas.toDataURL('image/png');
-            cropModal.style.display = 'none';
-            cropper.destroy();
-            cropper = null;
-            document.getElementById('upload-status-text').innerHTML = '<i class="fas fa-check-circle" style="color:var(--success-color);"></i> Image cropped and ready to upload! Click <b>Save Changes</b> below.';
-        }
-    </script>
 
 
     <script src="js/nav.js"></script>

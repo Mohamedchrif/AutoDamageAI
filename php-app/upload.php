@@ -7,27 +7,49 @@ require_once 'config.php';
 // Clean any output from config.php (DB warnings etc.)
 ob_clean();
 
-// Now set the correct JSON header
+// Set JSON response header
 header('Content-Type: application/json');
 
-// ─── Validate File ────────────────────────────────────────────
-if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-    echo json_encode(["error" => "No valid image uploaded."]);
+// ─── Read JSON Body ────────────────────────────────────────────────────────────
+$rawBody = file_get_contents('php://input');
+$payload = json_decode($rawBody, true);
+
+if (!$payload || empty($payload['image_base64'])) {
+    echo json_encode(["error" => "No image data received. Expected JSON with 'image_base64' field."]);
     exit;
 }
 
-$fileTmpPath = $_FILES['image']['tmp_name'];
-$fileName    = $_FILES['image']['name'];
-$fileType    = mime_content_type($fileTmpPath);
+$base64Data = $payload['image_base64'];
+$fileName   = isset($payload['filename']) ? basename($payload['filename']) : 'upload.jpg';
 
-if (strpos($fileType, 'image/') !== 0) {
-    echo json_encode(["error" => "Uploaded file is not an image."]);
+// ─── Decode Base64 → Binary ───────────────────────────────────────────────────
+// Strip the data URI prefix:  data:image/jpeg;base64,<data>
+if (strpos($base64Data, ';base64,') !== false) {
+    [, $base64Data] = explode(';base64,', $base64Data);
+}
+
+$imageData = base64_decode($base64Data, true);
+if ($imageData === false) {
+    echo json_encode(["error" => "Invalid base64 image data."]);
     exit;
 }
 
-// ─── Send to Flask AI API ─────────────────────────────────────
+// ─── Validate It Is Really an Image ───────────────────────────────────────────
+$finfo    = new finfo(FILEINFO_MIME_TYPE);
+$mimeType = $finfo->buffer($imageData);
+
+if (!$mimeType || strpos($mimeType, 'image/') !== 0) {
+    echo json_encode(["error" => "Uploaded data is not a valid image."]);
+    exit;
+}
+
+// ─── Write to a Temp File (for cURL to Flask) ─────────────────────────────────
+$tmpPath = tempnam(sys_get_temp_dir(), 'autodamg_');
+file_put_contents($tmpPath, $imageData);
+
+// ─── Send to Flask AI API ──────────────────────────────────────────────────────
 $flaskApiUrl = 'http://127.0.0.1:5000/predict';
-$cFile       = new CURLFile($fileTmpPath, $fileType, $fileName);
+$cFile       = new CURLFile($tmpPath, $mimeType, $fileName);
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $flaskApiUrl);
@@ -41,13 +63,16 @@ $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $curlError = curl_error($ch);
 curl_close($ch);
 
+// Remove the temporary file
+@unlink($tmpPath);
+
 if ($response === false || $httpCode !== 200) {
     $friendlyError = "Our AI engines are currently offline or unreachable. Please try again later.";
     echo json_encode(["error" => $friendlyError, "details" => $curlError, "http_code" => $httpCode]);
     exit;
 }
 
-// ─── Validate Flask Response ──────────────────────────────────
+// ─── Validate Flask Response ───────────────────────────────────────────────────
 $resultData = json_decode($response, true);
 
 if (!$resultData || !isset($resultData['success'])) {
@@ -55,16 +80,16 @@ if (!$resultData || !isset($resultData['success'])) {
     exit;
 }
 
-// ─── Save Original Image for Before & After Slider ─────────────
+// ─── Save Original Image for Before & After Slider ────────────────────────────
 $uploadDir = 'assets/uploads/';
 if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-// Safely copy temporary file
+
 $originalPath = $uploadDir . 'orig_' . time() . '_' . rand(1000, 9999) . '.jpg';
-copy($fileTmpPath, $originalPath);
+file_put_contents($originalPath, $imageData);
 $resultData['original_image'] = $originalPath;
 $jsonToDB = json_encode($resultData);
 
-// ─── Save to Database ─────────────────────────────────────────
+// ─── Save to Database ──────────────────────────────────────────────────────────
 $userId = $_SESSION['user_id'] ?? null;
 
 try {
