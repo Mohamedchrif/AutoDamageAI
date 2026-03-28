@@ -4,6 +4,21 @@ require_login();
 
 $user = get_current_user_data($pdo);
 
+if (isset($_POST['delete_account'])) {
+    $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+    try {
+        $stmt->execute([$_SESSION['user_id']]);
+        session_unset();
+        session_destroy();
+        header("Location: home.php");
+        exit;
+    } catch (Exception $e) {
+        set_flash_message('danger', 'An error occurred. Please try again.');
+        header("Location: profile.php");
+        exit;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -22,59 +37,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
             if ($stmt->fetch()) {
                 set_flash_message('danger', 'That email is already registered to another account.');
             } else {
-                $profile_picture = $user['profile_picture'] ?? null;
+                $profile_pic = $user['profile_pic'] ?? null;
                 $upload_ok = true;
-                $uploadFileDir = __DIR__ . '/assets/profiles/';
-                
-                // Ensure the upload directory exists
-                if (!is_dir($uploadFileDir)) {
-                    mkdir($uploadFileDir, 0775, true);
-                }
 
                 if (!empty($_POST['cropped_image'])) {
                     // Instagram-style cropped image (Base64)
-                    $data = $_POST['cropped_image'];
-                    list($type, $data) = explode(';', $data);
-                    list(, $data)      = explode(',', $data);
-                    $data = base64_decode($data);
-                    
-                    $newFileName = 'user_' . $_SESSION['user_id'] . '_' . time() . '.png';
-                    $dest_path_absolute = $uploadFileDir . $newFileName;
-                    $dest_path_relative = 'assets/profiles/' . $newFileName;
-                    
-                    if (file_put_contents($dest_path_absolute, $data)) {
-                        if (!empty($user['profile_picture'])) {
-                            $old_abs = __DIR__ . '/' . $user['profile_picture'];
-                            if (file_exists($old_abs)) unlink($old_abs);
-                        }
-                        $profile_picture = $dest_path_relative;
-                    } else {
-                        $upload_ok = false;
-                        set_flash_message('danger', 'Error saving the cropped profile picture.');
-                    }
+                    $profile_pic = $_POST['cropped_image'];
                 } elseif (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
                     // Fallback to standard upload
                     $fileTmpPath = $_FILES['profile_picture']['tmp_name'];
-                    $fileName = $_FILES['profile_picture']['name'];
-                    $fileNameCmps = explode(".", $fileName);
+                    $fileNameCmps = explode(".", $_FILES['profile_picture']['name']);
                     $fileExtension = strtolower(end($fileNameCmps));
                     
                     $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg', 'webp');
                     if (in_array($fileExtension, $allowedfileExtensions)) {
-                        $newFileName = 'user_' . $_SESSION['user_id'] . '_' . time() . '.' . $fileExtension;
-                        $dest_path_absolute = $uploadFileDir . $newFileName;
-                        $dest_path_relative = 'assets/profiles/' . $newFileName;
-                        
-                        if (move_uploaded_file($fileTmpPath, $dest_path_absolute)) {
-                            if (!empty($user['profile_picture'])) {
-                                $old_abs = __DIR__ . '/' . $user['profile_picture'];
-                                if (file_exists($old_abs)) unlink($old_abs);
-                            }
-                            $profile_picture = $dest_path_relative;
-                        } else {
-                            $upload_ok = false;
-                            set_flash_message('danger', 'Error moving the uploaded file.');
-                        }
+                        $finfo = new finfo(FILEINFO_MIME_TYPE);
+                        $mimeType = $finfo->file($fileTmpPath);
+                        $profile_pic = 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($fileTmpPath));
                     } else {
                         $upload_ok = false;
                         set_flash_message('danger', 'Upload failed. Allowed file types: ' . implode(',', $allowedfileExtensions));
@@ -82,9 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
                 }
 
                 if ($upload_ok) {
-                    $stmt = $pdo->prepare("UPDATE users SET username = ?, email = ?, phone = ?, profile_picture = ? WHERE id = ?");
+                    $stmt = $pdo->prepare("UPDATE users SET username = ?, email = ?, phone = ?, profile_pic = ? WHERE id = ?");
                     try {
-                        $stmt->execute([$username, $email, $phone, $profile_picture, $_SESSION['user_id']]);
+                        $stmt->execute([$username, $email, $phone, $profile_pic, $_SESSION['user_id']]);
                         set_flash_message('success', 'Profile updated successfully!');
                         $user = get_current_user_data($pdo); // Refresh data
                     } catch (Exception $e) {
@@ -131,21 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     exit;
 }
 
-// Additional check for account deletion POST route could be handled here or separate script
-if (isset($_POST['delete_account'])) {
-    $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-    try {
-        $stmt->execute([$_SESSION['user_id']]);
-        session_unset();
-        session_destroy();
-        header("Location: home.php");
-        exit;
-    } catch (Exception $e) {
-        set_flash_message('danger', 'An error occurred. Please try again.');
-        header("Location: profile.php");
-        exit;
-    }
-}
+// Account deletion handled at top
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -201,9 +166,9 @@ if (isset($_POST['delete_account'])) {
                 <!-- Header Banner Area -->
                 <div class="profile-banner" style="height: 140px; background: linear-gradient(135deg, var(--primary-color) 0%, #1e3a5f 100%); position: relative;">
                     <div class="profile-banner-avatar">
-                        <?php if (!empty($user['profile_picture']) && file_exists($user['profile_picture'])): ?>
+                        <?php if (!empty($user['profile_pic'])): ?>
                             <div class="avatar-large" style="width: 100px; height: 100px; border-radius: 50%; border: 5px solid white; box-shadow: 0 8px 24px rgba(0,0,0,0.12); overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <img src="<?= htmlspecialchars($user['profile_picture']) ?>?v=<?= time() ?>" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                                <img src="<?= $user['profile_pic'] ?>" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; display: block;">
                             </div>
                         <?php else: ?>
                             <div class="avatar-large" style="width: 100px; height: 100px; border-radius: 50%; background: var(--secondary-color); border: 5px solid white; box-shadow: 0 8px 24px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 800; color: white;">

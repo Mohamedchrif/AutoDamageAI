@@ -1,104 +1,131 @@
 <?php
-// Buffer all output so PHP warnings don't corrupt the JSON response
+// Buffer output to prevent JSON corruption
 ob_start();
-
 require_once 'config.php';
-
-// Clean any output from config.php (DB warnings etc.)
 ob_clean();
 
-// Set JSON response header
 header('Content-Type: application/json');
 
-// ─── Read JSON Body ────────────────────────────────────────────────────────────
-$rawBody = file_get_contents('php://input');
-$payload = json_decode($rawBody, true);
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-if (!$payload || empty($payload['image_base64'])) {
-    echo json_encode(["error" => "No image data received. Expected JSON with 'image_base64' field."]);
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Authentication required.', 'redirect' => 'login.php']);
     exit;
 }
 
-$base64Data = $payload['image_base64'];
-$fileName   = isset($payload['filename']) ? basename($payload['filename']) : 'upload.jpg';
-
-// ─── Decode Base64 → Binary ───────────────────────────────────────────────────
-// Strip the data URI prefix:  data:image/jpeg;base64,<data>
-if (strpos($base64Data, ';base64,') !== false) {
-    [, $base64Data] = explode(';base64,', $base64Data);
-}
-
-$imageData = base64_decode($base64Data, true);
-if ($imageData === false) {
-    echo json_encode(["error" => "Invalid base64 image data."]);
+if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'No image uploaded.']);
     exit;
 }
 
-// ─── Validate It Is Really an Image ───────────────────────────────────────────
-$finfo    = new finfo(FILEINFO_MIME_TYPE);
-$mimeType = $finfo->buffer($imageData);
+$file = $_FILES['image'];
+$originalName = basename($file['name']);
+$tmpPath = $file['tmp_name'];
+$fileSize = $file['size'];
 
-if (!$mimeType || strpos($mimeType, 'image/') !== 0) {
-    echo json_encode(["error" => "Uploaded data is not a valid image."]);
+$finfo = new finfo(FILEINFO_MIME_TYPE);
+$mimeType = $finfo->file($tmpPath);
+$allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+if (!in_array($mimeType, $allowed)) {
+    http_response_code(422);
+    echo json_encode(['success' => false, 'error' => 'Invalid file type. Allowed: JPG, PNG, WEBP, GIF']);
     exit;
 }
 
-// ─── Write to a Temp File (for cURL to Flask) ─────────────────────────────────
-$tmpPath = tempnam(sys_get_temp_dir(), 'autodamg_');
-file_put_contents($tmpPath, $imageData);
+if ($fileSize > 16 * 1024 * 1024) {
+    http_response_code(413);
+    echo json_encode(['success' => false, 'error' => 'File too large. Maximum size is 16 MB']);
+    exit;
+}
 
-// ─── Send to Flask AI API ──────────────────────────────────────────────────────
-$flaskApiUrl = 'http://127.0.0.1:5000/predict';
-$cFile       = new CURLFile($tmpPath, $mimeType, $fileName);
+// Convert original to Base64 for the frontend slider so we don't save to disk
+$originalBase64 = 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($tmpPath));
 
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $flaskApiUrl);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, ['image' => $cFile]);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+// ── Call Flask AI Server ────────────────────────────────────
+$FLASK_URL = 'http://127.0.0.1:5000/predict';
+$curlFile = new CURLFile($tmpPath, $mimeType, $originalName);
+$ch = curl_init($FLASK_URL);
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_POSTFIELDS => ['image' => $curlFile],
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT => 120,
+    CURLOPT_CONNECTTIMEOUT => 10,
+]);
 
-$response  = curl_exec($ch);
-$httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$rawResponse = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $curlError = curl_error($ch);
 curl_close($ch);
 
-// Remove the temporary file
-@unlink($tmpPath);
-
-if ($response === false || $httpCode !== 200) {
-    $friendlyError = "Our AI engines are currently offline or unreachable. Please try again later.";
-    echo json_encode(["error" => $friendlyError, "details" => $curlError, "http_code" => $httpCode]);
+if ($rawResponse === false || $curlError) {
+    http_response_code(503);
+    echo json_encode(['success' => false, 'error' => 'Could not reach AI server: ' . $curlError]);
     exit;
 }
 
-// ─── Validate Flask Response ───────────────────────────────────────────────────
-$resultData = json_decode($response, true);
+$flaskData = json_decode($rawResponse, true);
 
-if (!$resultData || !isset($resultData['success'])) {
-    echo json_encode(["error" => "Invalid response from AI service.", "raw" => substr($response, 0, 300)]);
+if (json_last_error() !== JSON_ERROR_NONE || empty($flaskData['success'])) {
+    $flaskError = $flaskData['error'] ?? 'Unknown AI error';
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'AI analysis failed: ' . $flaskError]);
     exit;
 }
 
-// ─── Save Original Image for Before & After Slider ────────────────────────────
-$uploadDir = 'assets/uploads/';
-if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+// ── Map Flask Data ──────────────────────────────────────────
+$isUndamaged = (bool)($flaskData['is_undamaged'] ?? true);
+$totalDetections = (int)($flaskData['total_detections'] ?? 0);
+$costMin = (float)($flaskData['cost_min'] ?? 0);
+$costMax = (float)($flaskData['cost_max'] ?? 0);
+$detectedIssues = $flaskData['detected_issues'] ?? [];
+$annotatedImage = $flaskData['annotated_image'] ?? ''; 
 
-$originalPath = $uploadDir . 'orig_' . time() . '_' . rand(1000, 9999) . '.jpg';
-file_put_contents($originalPath, $imageData);
-$resultData['original_image'] = $originalPath;
-$jsonToDB = json_encode($resultData);
+// Build result JSON for the old frontend logic which expected things inside result_json
+$resultJson = json_encode([
+    'is_undamaged' => $isUndamaged,
+    'total_detections' => $totalDetections,
+    'detected_issues' => $detectedIssues,
+    'cost_min' => $costMin,
+    'cost_max' => $costMax,
+    'original_image' => $originalBase64
+]);
 
-// ─── Save to Database ──────────────────────────────────────────────────────────
-$userId = $_SESSION['user_id'] ?? null;
-
+// ── Save to Database using the new schema ───────────────────
 try {
-    $stmt = $pdo->prepare("INSERT INTO analyses (user_id, filename, result_json) VALUES (?, ?, ?)");
-    $stmt->execute([$userId, $fileName, $jsonToDB]);
-    $analysisId = $pdo->lastInsertId();
-    $resultData['redirect'] = "result.php?id=" . $analysisId;
-    echo json_encode($resultData);
+    $ext = pathinfo($originalName, PATHINFO_EXTENSION) ?: 'jpg';
+    $storedFilename = 'analysis_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
+    
+    $stmt = $pdo->prepare("
+        INSERT INTO analyses 
+            (user_id, filename, original_filename, file_size, result_json, annotated_image, cost_min, cost_max, total_detections, is_undamaged) 
+        VALUES 
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    
+    $stmt->execute([
+        $_SESSION['user_id'],
+        $storedFilename,
+        $originalName,
+        $fileSize,
+        $resultJson,
+        $annotatedImage,
+        $costMin,
+        $costMax,
+        $totalDetections,
+        (int)$isUndamaged
+    ]);
+    
+    echo json_encode([
+        'success' => true,
+        'analysis_id' => $pdo->lastInsertId()
+    ]);
 } catch (Exception $e) {
-    echo json_encode(["error" => "Database error: " . $e->getMessage()]);
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
 }
 ?>

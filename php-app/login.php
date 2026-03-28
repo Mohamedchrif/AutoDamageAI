@@ -10,15 +10,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    $stmt = $pdo->prepare("SELECT id, password_hash FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT id, username, email, password_hash, role, blocked FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password_hash'])) {
-        // Login success
-        $_SESSION['user_id'] = $user['id'];
-        header("Location: dashboard.php");
-        exit;
+        if (!empty($user['blocked'])) {
+            set_flash_message('danger', 'Your account has been blocked. Contact support.');
+        } else {
+            // Handle "remember me" check
+            if (!empty($_POST['remember'])) {
+                $lifetime = 60 * 60 * 24 * 30; // 30 days
+                session_set_cookie_params($lifetime);
+                ini_set('session.gc_maxlifetime', $lifetime);
+            }
+
+            // Login success
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['blocked'] = (bool)($user['blocked'] ?? false);
+            
+            header("Location: dashboard.php");
+            exit;
+        }
     } else {
         set_flash_message('danger', 'Please check your login details and try again.');
     }

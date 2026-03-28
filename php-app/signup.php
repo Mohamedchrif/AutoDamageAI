@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Hash password and insert
             // Flask used scrypt. PHP's password_hash defaults to bcrypt. Note: Users created in Flask won't be able to log in without re-hashing or writing a specific check, but we are migrating the system so new accounts will work seamlessly.
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, phone) VALUES (?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, phone, role) VALUES (?, ?, ?, ?, 'user')");
             try {
                 $stmt->execute([$username, $email, $hash, $phone]);
                 set_flash_message('success', 'Account created! You can now login.');
