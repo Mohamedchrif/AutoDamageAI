@@ -9,7 +9,6 @@ function switchTab(tab, btn) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(tab + '-tab').classList.add('active');
-    if (tab !== 'camera' && stream) stopCamera();
 }
 
 // ── File Upload helpers ───────────────────────────────────────
@@ -71,72 +70,49 @@ document.getElementById('upload-form').addEventListener('submit', async e => {
     await submitAnalysis(formData);
 });
 
-// ── Camera ────────────────────────────────────────────────────
-const video = document.getElementById('video-preview');
-const canvas = document.getElementById('canvas-preview');
-const startBtn = document.getElementById('start-camera-btn');
-const captureBtn = document.getElementById('capture-btn');
-const stopBtn = document.getElementById('stop-camera-btn');
-const retakeBtn = document.getElementById('retake-btn');
+// ── Camera (Native Input) ───────────────────────────────────────────────────
+const nativeCamInput = document.getElementById('native-camera-input');
+const nativeCamImg = document.getElementById('native-camera-img');
+const nativeCamPreview = document.getElementById('native-camera-preview');
+const nativeCamPlaceholder = document.getElementById('native-camera-placeholder');
 const camAnalyzeBtn = document.getElementById('camera-analyze-btn');
 const camErrorCard = document.getElementById('camera-error-card');
+let nativeCapturedFile = null;
 
 function showCamError(msg) { camErrorCard.style.display = 'block'; camErrorCard.textContent = msg; }
 function hideCamError() { camErrorCard.style.display = 'none'; }
 
-async function startCamera() {
-    hideCamError();
-    try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-        video.srcObject = stream;
-        video.style.display = 'block';
-        canvas.style.display = 'none';
-        startBtn.style.display = 'none';
-        stopBtn.style.display = '';
-        captureBtn.disabled = false;
-        camAnalyzeBtn.style.display = 'none';
-        retakeBtn.style.display = 'none';
-        capturedBlob = null;
-    } catch (err) { showCamError('Camera access denied or not available: ' + err.message); }
+if (nativeCamInput) {
+    nativeCamInput.addEventListener('change', (e) => {
+        hideCamError();
+        const file = e.target.files[0];
+        if (file) {
+            nativeCapturedFile = file;
+            nativeCamImg.src = URL.createObjectURL(file);
+            nativeCamPlaceholder.style.display = 'none';
+            nativeCamPreview.style.display = 'flex';
+            camAnalyzeBtn.style.display = 'inline-flex';
+        }
+    });
 }
 
-function stopCamera() {
-    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-    video.srcObject = null;
-    video.style.display = 'none';
-    startBtn.style.display = '';
-    stopBtn.style.display = 'none';
-    captureBtn.disabled = true;
-}
-
-function capturePhoto() {
-    if (!stream) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-    canvas.style.display = 'block';
-    video.style.display = 'none';
-    stopBtn.style.display = 'none';
-    captureBtn.disabled = true;
-    retakeBtn.style.display = '';
-    camAnalyzeBtn.style.display = '';
-    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-    canvas.toBlob(blob => { capturedBlob = blob; }, 'image/jpeg', 0.92);
-}
-
-function retakePhoto() {
-    capturedBlob = null;
-    canvas.style.display = 'none';
-    retakeBtn.style.display = 'none';
+window.clearNativeCamera = function(e) {
+    if (e) e.preventDefault();
+    nativeCapturedFile = null;
+    if (nativeCamInput) nativeCamInput.value = '';
+    nativeCamPreview.style.display = 'none';
+    nativeCamPlaceholder.style.display = 'block';
     camAnalyzeBtn.style.display = 'none';
-    startCamera();
+    hideCamError();
 }
 
-async function submitCapture() {
-    if (!capturedBlob) { showCamError('No photo captured yet.'); return; }
+window.submitNativeCapture = async function() {
+    if (!nativeCapturedFile) {
+        showCamError('Capture a photo first.');
+        return;
+    }
     const formData = new FormData();
-    formData.append('image', capturedBlob, 'camera_capture.jpg');
+    formData.append('image', nativeCapturedFile, nativeCapturedFile.name || 'camera_capture.jpg');
     await submitAnalysis(formData);
 }
 
@@ -148,7 +124,6 @@ async function submitAnalysis(formData) {
     hideCamError();
 
     try {
-        // POST to upload.php which encapsulates the backend Flask call
         const response = await fetch('upload.php', {
             method: 'POST',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -165,7 +140,6 @@ async function submitAnalysis(formData) {
             throw new Error(data.error || 'Analysis failed. Please try again.');
         }
 
-        // Redirect to result page with real analysis ID
         window.location.href = 'result.php?id=' + data.analysis_id;
 
     } catch (err) {

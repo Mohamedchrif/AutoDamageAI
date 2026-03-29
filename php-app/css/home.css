@@ -1,26 +1,10 @@
 /* Inheriting base styles and variables from main.css */
 
-/* Header styles */
-header {
-    background-color: var(--primary-color);
-    color: var(--light-text);
-    padding: 1.2rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+/* Inheriting base styles and variables from main.css */
 
+/* Home-specific section adjustments */
 .container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    width: 100% !important; /* Allow inherited max-width from main.css to handle centering while maintaining full width flexibility */
 }
 
 nav ul {
@@ -31,54 +15,31 @@ nav ul {
 }
 
 nav a {
-    color: var(--light-text);
+    color: var(--text-secondary);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.95rem;
-    transition: all 0.3s ease;
-    position: relative;
+    transition: color 0.3s ease;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-nav a:hover {
+nav a:not(.nav-cta):hover,
+nav a:not(.nav-cta).active {
     color: var(--secondary-color);
 }
 
-nav a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: var(--secondary-color);
-    transition: width 0.3s ease;
-}
+/* Unified CTA from main.css handles this */
 
-nav a:hover::after {
-    width: 100%;
-}
-
-.nav-cta {
-    background: linear-gradient(135deg, var(--secondary-color), #1a73e8);
-    padding: 0.6rem 1.5rem !important;
-    border-radius: 25px;
-    color: white !important;
-}
-
-.nav-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-}
-
-.nav-cta::after {
-    display: none;
+/* Hamburger: hidden on desktop; main.css + this file handle mobile */
+@media (min-width: 769px) {
+    .mobile-menu-btn {
+        display: none !important;
+    }
 }
 
 .mobile-menu-btn {
-    display: none;
     flex-direction: column;
     gap: 5px;
     cursor: pointer;
@@ -88,7 +49,7 @@ nav a:hover::after {
 .mobile-menu-btn span {
     width: 25px;
     height: 3px;
-    background: var(--light-text);
+    background: var(--primary-color) !important;
     border-radius: 3px;
     transition: all 0.3s ease;
 }
@@ -555,73 +516,6 @@ footer {
 }
 
 @media (max-width: 768px) {
-    /* Header & Mobile Nav */
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-    }
-    .mobile-menu-btn {
-        display: flex;
-        position: absolute;
-        right: 1.5rem;
-        top: 1.5rem;
-        z-index: 1001;
-    }
-    .mobile-menu-btn span {
-        background: var(--primary-color);
-    }
-    nav {
-        width: 100%;
-    }
-    nav ul.nav-links {
-        display: flex; /* Kept flex, but hidden via height */
-        flex-direction: column;
-        width: 100%;
-        background: white;
-        padding: 0;
-        margin-top: 1rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        border: 1px solid var(--border-color);
-        opacity: 0;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.4s ease-in-out, opacity 0.3s ease, padding 0.3s ease;
-    }
-    nav ul.nav-links.active {
-        max-height: 500px; /* Big enough to fit links */
-        padding: 0.5rem 0;
-        opacity: 1;
-    }
-    nav ul.nav-links li {
-        width: 100%;
-        text-align: center;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    nav ul.nav-links li:last-child {
-        border-bottom: none;
-    }
-    nav ul.nav-links a {
-        padding: 1.25rem 1rem;
-        color: var(--text-primary);
-        display: block;
-        font-size: 1.05rem;
-        font-weight: 600;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-    nav ul.nav-links a:hover {
-        background: #f8fafc;
-        color: var(--secondary-color);
-    }
-    nav ul.nav-links a.nav-cta {
-        width: 90%;
-        margin: 1rem auto;
-        padding: 1rem;
-        justify-content: center;
-    }
-
     /* Hero adjustments */
     .hero {
         min-height: auto;

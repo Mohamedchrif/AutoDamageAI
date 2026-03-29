@@ -1,12 +1,9 @@
 <?php
 require_once 'config.php';
-require_login();
-$user = get_current_user_data($pdo);
+require_admin();
 
-// Fetch all analyses for the current user
-$stmt = $pdo->prepare("SELECT * FROM analyses WHERE user_id = ? ORDER BY timestamp DESC");
-$stmt->execute([$user['id']]);
-$analyses = $stmt->fetchAll();
+// All inspections system-wide (admin only)
+$analyses = $pdo->query("SELECT * FROM analyses ORDER BY timestamp DESC")->fetchAll();
 
 // -----------------------------------------
 // Data Aggregation Variables
@@ -103,53 +100,17 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
-        .chart-card { background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
-        .chart-card h3 { font-size: 1.1rem; color: var(--primary-color); margin-top: 0; margin-bottom: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
-        .chart-container-inner { position: relative; height: 300px; width: 100%; display: flex; justify-content: center; align-items: center; }
-        
-        .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .kpi-card { background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1.25rem; transition: transform 0.2s; }
-        .kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-        .kpi-icon { width: 56px; height: 56px; border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
-        .kpi-blue { background: #eff6ff; color: #3b82f6; }
-        .kpi-green { background: #f0fdf4; color: #10b981; }
-        .kpi-orange { background: #fffbeb; color: #f59e0b; }
-        
-        .kpi-details h4 { margin: 0; color: var(--text-secondary); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
-        .kpi-value { margin: 0.4rem 0 0 0; font-size: 1.75rem; font-weight: 800; color: var(--primary-color); }
-    </style>
+<link rel="stylesheet" href="css/analytics.css">
 </head>
 <body>
     <div class="page-wrapper">
-        <header class="navbar" style="position: relative;">
-            <div class="container header-content" style="width: 100%;">
-                <a href="home.php" class="nav-logo" style="color: var(--primary-color);">
-                    <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
-                </a>
-                
-                <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                    <span></span><span></span><span></span>
-                </div>
-
-                <nav>
-                    <ul class="nav-links" id="navLinks">
-                        <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                        <li><a href="analytics.php" class="active"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                        <li><a href="index.php"><i class="fas fa-plus"></i> New Analysis</a></li>
-                        <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-                        <li><a href="logout.php" class="nav-cta" style="color: white !important;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+        <?php include 'navbar.php'; ?>
 
         <main class="main-content container" style="padding-top: 3rem; margin: 0 auto; max-width: 1200px;">
             <header class="page-header" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem;">
                 <div>
                     <h1 style="margin: 0; font-size: 2.25rem; font-weight: 800; color: var(--primary-color);">Advanced <span style="color: var(--secondary-color);">Analytics</span></h1>
-                    <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 1.05rem;">Data insights and repair cost estimations across your entire fleet.</p>
+                    <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 1.05rem;">Platform-wide data insights and repair cost trends (all users).</p>
                 </div>
             </header>
 
@@ -182,7 +143,7 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
             <div class="analytics-grid">
                 <!-- Doughnut Chart: Severity -->
                 <div class="chart-card">
-                    <h3><i class="fas fa-exclamation-circle" style="color: #ef4444;"></i> Fleet Severity Distribution</h3>
+                    <h3><i class="fas fa-exclamation-circle" style="color: #ef4444;"></i> Severity Distribution (all scans)</h3>
                     <div class="chart-container-inner">
                         <canvas id="severityChart"></canvas>
                         <?php if ($total_inspections == 0): ?>
@@ -209,20 +170,21 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
                         <?php endif; ?>
                     </div>
                 </div>
-            </div>
 
-            <div class="card" style="margin-bottom: 2.5rem;">
-                <h3 style="margin-top: 0; font-size: 1.25rem; font-weight: 800; color: var(--primary-color); display: flex; align-items: center; gap: 0.75rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.75rem;">
-                    <i class="fas fa-coins" style="color: var(--secondary-color); background: #eff6ff; padding: 0.5rem; border-radius: 0.5rem;"></i> Financial Overview
-                </h3>
-                <div style="display: flex; flex-wrap: wrap; gap: 3rem; margin-top: 1.5rem;">
-                    <div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 0.4rem;">Total Minimum Estimated Liability</div>
-                        <div style="font-size: 2rem; font-weight: 800; color: var(--text-primary);">$<?= number_format($total_cost_min) ?></div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 0.4rem;">Total Maximum Estimated Liability</div>
-                        <div style="font-size: 2rem; font-weight: 800; color: var(--danger-color);">$<?= number_format($total_cost_max) ?></div>
+                <div class="chart-card" style="grid-column: 1 / -1;">
+                    <h3><i class="fas fa-coins" style="color: #0ea5e9;"></i> Financial Overview</h3>
+                    <p style="margin: -0.75rem 0 1.25rem 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">
+                        Aggregated repair estimates across all inspections (sum of per-scan minimum and maximum ranges).
+                    </p>
+                    <div class="financial-stats">
+                        <div class="financial-stat">
+                            <p class="financial-stat-label">Total minimum estimated liability</p>
+                            <p class="financial-stat-value financial-stat-value--min">$<?= number_format($total_cost_min) ?></p>
+                        </div>
+                        <div class="financial-stat">
+                            <p class="financial-stat-label">Total maximum estimated liability</p>
+                            <p class="financial-stat-value financial-stat-value--max">$<?= number_format($total_cost_max) ?></p>
+                        </div>
                     </div>
                 </div>
             </div>

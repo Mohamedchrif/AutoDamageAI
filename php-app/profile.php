@@ -19,6 +19,26 @@ if (isset($_POST['delete_account'])) {
     }
 }
 
+// Quick avatar update from banner (crop modal → POST without full profile form)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['avatar_only'] ?? '') === '1') {
+    $pic = $_POST['cropped_image'] ?? '';
+    if (!is_string($pic) || strpos($pic, 'data:image/') !== 0) {
+        set_flash_message('danger', 'Invalid image.');
+    } elseif (strlen($pic) > 5 * 1024 * 1024) {
+        set_flash_message('danger', 'Image too large. Try a smaller photo.');
+    } else {
+        $stmt = $pdo->prepare('UPDATE users SET profile_pic = ? WHERE id = ?');
+        try {
+            $stmt->execute([$pic, $_SESSION['user_id']]);
+            set_flash_message('success', 'Profile photo updated.');
+        } catch (Exception $e) {
+            set_flash_message('danger', 'Could not save photo.');
+        }
+    }
+    header('Location: profile.php');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -125,28 +145,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     <link rel="stylesheet" href="css/profile.css">
 </head>
 <body>
+    <form id="avatar-only-form" method="POST" action="profile.php" hidden>
+        <input type="hidden" name="avatar_only" value="1">
+        <input type="hidden" name="cropped_image" id="avatar_cropped_input" value="">
+    </form>
     <div class="page-wrapper">
-        <header class="navbar" style="position: relative;">
-            <div class="container header-content" style="width: 100%;">
-                <a href="home.php" class="nav-logo" style="color: var(--primary-color);">
-                    <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
-                </a>
-                
-                <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                    <span></span><span></span><span></span>
-                </div>
-
-                <nav>
-                    <ul class="nav-links" id="navLinks">
-                        <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                    <li><a href="analytics.php"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                    <li><a href="index.php"><i class="fas fa-plus"></i> New Analysis</a></li>
-                        <li><a href="profile.php" class="active"><i class="fas fa-user"></i> Profile</a></li>
-                        <li><a href="logout.php" class="nav-cta" style="color: white !important;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+        <?php include 'navbar.php'; ?>
 
         <main class="main-content container" style="padding-top: 3rem; margin: 0 auto; max-width: 1200px;">
             <header class="page-header" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem;">
@@ -166,15 +170,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                 <!-- Header Banner Area -->
                 <div class="profile-banner" style="height: 140px; background: linear-gradient(135deg, var(--primary-color) 0%, #1e3a5f 100%); position: relative;">
                     <div class="profile-banner-avatar">
-                        <?php if (!empty($user['profile_pic'])): ?>
-                            <div class="avatar-large" style="width: 100px; height: 100px; border-radius: 50%; border: 5px solid white; box-shadow: 0 8px 24px rgba(0,0,0,0.12); overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <img src="<?= $user['profile_pic'] ?>" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-                            </div>
-                        <?php else: ?>
-                            <div class="avatar-large" style="width: 100px; height: 100px; border-radius: 50%; background: var(--secondary-color); border: 5px solid white; box-shadow: 0 8px 24px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 800; color: white;">
-                                <?= strtoupper(substr($user['username'], 0, 1)) ?>
-                            </div>
-                        <?php endif; ?>
+                        <input type="file" id="avatar_file_input" accept="image/*" hidden aria-hidden="true" tabindex="-1">
+                        <button type="button" class="avatar-picker-btn" id="avatar-picker-btn" title="<?= htmlspecialchars('Change profile photo', ENT_QUOTES, 'UTF-8') ?>" aria-label="Change profile photo">
+                            <?php if (!empty($user['profile_pic'])): ?>
+                                <div class="avatar-large" style="width: 100px; height: 100px; border-radius: 50%; border: 5px solid white; box-shadow: 0 8px 24px rgba(0,0,0,0.12); overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <img src="<?= htmlspecialchars($user['profile_pic'], ENT_QUOTES, 'UTF-8') ?>" alt="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                                </div>
+                            <?php else: ?>
+                                <div class="avatar-large" style="width: 100px; height: 100px; border-radius: 50%; background: var(--secondary-color); border: 5px solid white; box-shadow: 0 8px 24px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 800; color: white;">
+                                    <?= strtoupper(substr($user['username'], 0, 1)) ?>
+                                </div>
+                            <?php endif; ?>
+                            <span class="avatar-picker-overlay" aria-hidden="true"><i class="fas fa-camera"></i><span class="avatar-picker-text">Change</span></span>
+                        </button>
                     </div>
                 </div>
 
@@ -252,20 +260,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                         </style>
                         <div style="margin-bottom: 2.5rem;">
                             <h2 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: var(--primary-color);">Edit Profile Details</h2>
-                            <p style="color: var(--text-secondary); margin-top: 0.4rem;">Keep your information up to date.</p>
+                            <p style="color: var(--text-secondary); margin-top: 0.4rem;">Keep your information up to date. To change your photo, use your profile picture above.</p>
                         </div>
 
-                        <form action="profile.php" method="POST" enctype="multipart/form-data">
+                        <form action="profile.php" method="POST">
                             <div class="profile-edit-grid">
-                                <div class="form-group" style="grid-column: 1 / -1;">
-                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Profile Picture</label>
-                                    <div class="input-with-icon" style="position: relative;">
-                                        <i class="fas fa-image" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="file" id="profile_picture_input" accept="image/*" class="form-input" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;">
-                                        <input type="hidden" name="cropped_image" id="cropped_image_base64">
-                                    </div>
-                                    <p id="upload-status-text" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Optional. Allowed formats: JPG, PNG, GIF, WebP.</p>
-                                </div>
                                 <div class="form-group">
                                     <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Username</label>
                                     <div class="input-with-icon" style="position: relative;">

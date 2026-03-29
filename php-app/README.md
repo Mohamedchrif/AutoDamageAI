@@ -8,8 +8,9 @@ To run this system, you need both the MySQL/PHP server and the Flask AI server r
 
 ### 1. Database Setup
 1. Open your MySQL client (e.g., phpMyAdmin or CLI).
-2. Run the SQL script found in `database.sql` to create the `autodamg_db` database and the required tables (`users`, `analyses`).
-3. Open `config.php` and update the database credentials (`$db_user` and `$db_pass`) to match your local MySQL setup.
+2. Import `autodamg_db.sql` (in this folder) to create the `autodamg_db` database and tables (`users`, `analyses`).
+3. Optional: copy `.env.example` to `.env` and set `AUTODAMG_DB_*` (and `AUTODAMG_FLASK_PREDICT_URL` if Flask is not on `127.0.0.1:5000`). If `.env` is missing, defaults match typical XAMPP (`root` / empty password).
+4. Analysis images are stored in MySQL (`result_json` / `annotated_image` as base64 data URIs). For large photos, raise MySQL `max_allowed_packet` if inserts fail.
 
 ### 2. Start the PHP Server (Frontend)
 Navigate into the `php-app` directory and start a local PHP development server:

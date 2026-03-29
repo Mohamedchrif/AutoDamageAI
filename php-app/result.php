@@ -18,9 +18,19 @@ if (!$analysis) {
     exit;
 }
 
-$result   = json_decode($analysis['result_json'], true);
+$result = json_decode($analysis['result_json'], true) ?: [];
 $filename = htmlspecialchars($analysis['filename']);
 $timestamp = $analysis['timestamp'];
+
+$annotatedSrc = trim((string)($analysis['annotated_image'] ?? ''));
+if ($annotatedSrc === '' && !empty($result['annotated_image'])) {
+    $annotatedSrc = (string) $result['annotated_image'];
+}
+$originalSrc = trim((string)($result['original_image'] ?? ''));
+
+$imgUrl = static function (string $src): string {
+    return htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
+};
 
 // Severity counts
 $majorCount = $moderateCount = $minorCount = 0;
@@ -31,6 +41,25 @@ if (isset($result['detected_issues'])) {
         elseif ($issue['severity'] === 'minor')    $minorCount++;
     }
 }
+
+// Absolute image URL for PDF export (jsPDF + fetch — avoids blank html2canvas output)
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$appBaseUrl = rtrim($scheme . '://' . $host . (($scriptDir === '/' || $scriptDir === '') ? '' : $scriptDir), '/') . '/';
+$annotatedForPdf = $annotatedSrc;
+if ($annotatedSrc !== '' && strpos($annotatedSrc, 'data:') !== 0 && !preg_match('#^https?://#i', $annotatedSrc)) {
+    $annotatedForPdf = $appBaseUrl . ltrim(str_replace('\\', '/', $annotatedSrc), '/');
+}
+
+$pdfPayload = [
+    'filename' => $analysis['filename'],
+    'date'     => date('Y-m-d', strtotime($timestamp)),
+    'image'    => $annotatedForPdf,
+    'costMin'  => (float)($result['cost_min'] ?? 0),
+    'costMax'  => (float)($result['cost_max'] ?? 0),
+    'issues'   => array_values($result['detected_issues'] ?? []),
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -46,25 +75,7 @@ if (isset($result['detected_issues'])) {
 <body>
 
     <!-- Navbar -->
-    <header class="navbar">
-        <div class="container header-content">
-            <a href="home.php" class="nav-logo">
-                <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
-            </a>
-            <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                <span></span><span></span><span></span>
-            </div>
-            <nav>
-                <ul class="nav-links" id="navLinks">
-                    <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                    <li><a href="analytics.php"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                    <li><a href="index.php"><i class="fas fa-plus"></i> New Analysis</a></li>
-                    <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-                    <li><a href="logout.php" class="nav-cta"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <?php include 'navbar.php'; ?>
 
     <div class="result-container">
 
@@ -121,10 +132,10 @@ if (isset($result['detected_issues'])) {
                     <i class="fas fa-image"></i> AI Inspection View
                 </h2>
 
-                <?php if (isset($result['original_image'])): ?>
+                <?php if ($originalSrc !== ''): ?>
                 <div class="comparison-container" id="comparison-container">
-                    <img id="original-img-pdf"      src="<?= $result['original_image'] ?>"   class="comparison-base"     alt="Original Vehicle">
-                    <img id="annotated-img-compare" src="<?= $result['annotated_image'] ?>"  class="comparison-annotated" alt="Annotated Vehicle">
+                    <img id="original-img-pdf"      src="<?= $imgUrl($originalSrc) ?>"   class="comparison-base"     alt="Original Vehicle">
+                    <img id="annotated-img-compare" src="<?= $imgUrl($annotatedSrc) ?>"  class="comparison-annotated" alt="Annotated Vehicle">
                     <div id="compare-slider" class="compare-slider">
                         <div class="slider-pill" id="slider-pill">
                             <i class="fas fa-arrows-alt-h"></i>
@@ -136,7 +147,7 @@ if (isset($result['detected_issues'])) {
                     <span>AI Annotated <i class="fas fa-robot"></i></span>
                 </div>
                 <?php else: ?>
-                <img class="annotated-img" id="annotated-img" src="<?= $result['annotated_image'] ?>" alt="Annotated Vehicle">
+                <img class="annotated-img" id="annotated-img" src="<?= $imgUrl($annotatedSrc) ?>" alt="Annotated Vehicle">
                 <?php endif; ?>
             </div>
 
@@ -202,58 +213,6 @@ if (isset($result['detected_issues'])) {
             </div>
         </div>
 
-        <!-- ── Individual Damage Cards ────────────────────────────────────── -->
-        <h2 class="section-heading">
-            Detailed Findings
-            <span class="section-sub">(<?= $result['total_detections'] ?> issues found)</span>
-        </h2>
-
-        <div class="damage-cards-grid">
-            <?php if (isset($result['detected_issues'])): ?>
-            <?php foreach ($result['detected_issues'] as $issue):
-                $conf_pct = round($issue['confidence'] * 100, 1);
-            ?>
-            <div class="damage-card">
-                <div class="damage-card-top">
-                    <div class="damage-card-sev-icon icon-<?= $issue['severity'] ?>">
-                        <?php if ($issue['severity'] === 'major'): ?>
-                            <i class="fas fa-exclamation-triangle"></i>
-                        <?php elseif ($issue['severity'] === 'moderate'): ?>
-                            <i class="fas fa-exclamation-circle"></i>
-                        <?php else: ?>
-                            <i class="fas fa-info-circle"></i>
-                        <?php endif; ?>
-                    </div>
-                    <div>
-                        <div class="damage-card-title">
-                            <?= ucwords(str_replace('-', ' ', htmlspecialchars($issue['class']))) ?>
-                        </div>
-                        <div class="damage-card-class">
-                            <span class="status-badge status-<?= $issue['severity'] ?>">
-                                <?= htmlspecialchars($issue['severity']) ?> damage
-                            </span>
-                        </div>
-                        <div class="confidence-bar" data-conf="<?= $conf_pct ?>">
-                            <div class="confidence-fill"></div>
-                        </div>
-                        <div class="confidence-label">Confidence: <strong><?= $conf_pct ?>%</strong></div>
-                    </div>
-                </div>
-                <div class="damage-card-body">
-                    <div class="detail-item">
-                        <div class="detail-label">Repair Cost</div>
-                        <div class="cost-pill"><i class="fas fa-dollar-sign"></i>$<?= $issue['cost_min'] ?> – $<?= $issue['cost_max'] ?></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Detection Zone</div>
-                        <div class="detail-val">[<?= implode(', ', $issue['bbox']) ?>]</div>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-
         <?php endif; ?>
 
         <!-- ── Bottom Actions ─────────────────────────────────────────────── -->
@@ -277,7 +236,7 @@ if (isset($result['detected_issues'])) {
         </div>
 
         <div class="pdf-image-wrap">
-            <img src="<?= $result['annotated_image'] ?>" alt="Vehicle AI Analysis" class="pdf-image">
+            <img src="<?= $imgUrl($annotatedSrc) ?>" alt="Vehicle AI Analysis" class="pdf-image">
         </div>
 
         <div>
@@ -316,7 +275,8 @@ if (isset($result['detected_issues'])) {
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="application/json" id="report-pdf-data"><?= json_encode($pdfPayload, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="js/nav.js"></script>
     <script src="js/result.js"></script>
 </body>

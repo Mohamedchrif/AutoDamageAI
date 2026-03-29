@@ -1,68 +1,85 @@
-// ─── Image Cropper & Base64 Upload ───────────────────────────────────────────
+// ─── Image Cropper (banner avatar only; Edit Profile no longer has file field) ─
 let cropper = null;
 
+function startCropperFromFile(file) {
+    const imageToCrop = document.getElementById('image-to-crop');
+    const cropModal = document.getElementById('crop-modal');
+    if (!imageToCrop || !cropModal || !file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        imageToCrop.src = event.target.result;
+        cropModal.style.display = 'flex';
+
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(imageToCrop, {
+            aspectRatio: 1,
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 0.9,
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false,
+        });
+    };
+    reader.readAsDataURL(file);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-    const imageToCrop  = document.getElementById('image-to-crop');
-    const fileInput    = document.getElementById('profile_picture_input');
-    const croppedInput = document.getElementById('cropped_image_base64');
-    const cropModal    = document.getElementById('crop-modal');
+    const avatarFileInput = document.getElementById('avatar_file_input');
+    const avatarPickerBtn = document.getElementById('avatar-picker-btn');
 
-    if (!fileInput) return; // Guard: only run on profile page
+    if (avatarPickerBtn && avatarFileInput) {
+        avatarPickerBtn.addEventListener('click', function () {
+            avatarFileInput.click();
+        });
+    }
 
-    fileInput.addEventListener('change', function (e) {
-        const files = e.target.files;
-        if (files && files.length > 0) {
-            const file   = files[0];
-            const reader = new FileReader();
-
-            reader.onload = function (event) {
-                imageToCrop.src = event.target.result;
-                cropModal.style.display = 'flex';
-
-                if (cropper) cropper.destroy();
-
-                cropper = new Cropper(imageToCrop, {
-                    aspectRatio:          1,   // 1:1 square
-                    viewMode:             1,
-                    dragMode:             'move',
-                    autoCropArea:         0.9,
-                    restore:              false,
-                    guides:               true,
-                    center:               true,
-                    highlight:            false,
-                    cropBoxMovable:       true,
-                    cropBoxResizable:     true,
-                    toggleDragModeOnDblclick: false,
-                });
-            };
-
-            reader.readAsDataURL(file); // Convert to base64 DataURL
-        }
-    });
+    if (avatarFileInput) {
+        avatarFileInput.addEventListener('change', function (e) {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                startCropperFromFile(files[0]);
+            }
+        });
+    }
 });
 
 function cancelCrop() {
     const cropModal = document.getElementById('crop-modal');
-    const fileInput = document.getElementById('profile_picture_input');
-    cropModal.style.display = 'none';
-    if (cropper) { cropper.destroy(); cropper = null; }
-    fileInput.value = '';
+    const avatarFileInput = document.getElementById('avatar_file_input');
+    if (cropModal) cropModal.style.display = 'none';
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    if (avatarFileInput) avatarFileInput.value = '';
 }
 
 function applyCrop() {
     if (!cropper) return;
 
     const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+    const dataUrl = canvas.toDataURL('image/png');
 
-    // Encode cropped image as base64 PNG and store in hidden input
-    document.getElementById('cropped_image_base64').value = canvas.toDataURL('image/png');
-
-    document.getElementById('crop-modal').style.display = 'none';
+    const cropModalEl = document.getElementById('crop-modal');
+    if (cropModalEl) cropModalEl.style.display = 'none';
     cropper.destroy();
     cropper = null;
 
-    document.getElementById('upload-status-text').innerHTML =
-        '<i class="fas fa-check-circle" style="color:var(--success-color);"></i> Image cropped and ready to upload! Click <b>Save Changes</b> below.';
+    const hidden = document.getElementById('avatar_cropped_input');
+    const form = document.getElementById('avatar-only-form');
+    if (hidden && form) {
+        hidden.value = dataUrl;
+        form.submit();
+    }
+    const avatarFileInput = document.getElementById('avatar_file_input');
+    if (avatarFileInput) avatarFileInput.value = '';
 }
 
 // ─── Toggle profile view / edit form ─────────────────────────────────────────

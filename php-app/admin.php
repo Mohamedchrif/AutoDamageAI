@@ -170,34 +170,14 @@ $adminCount = count(array_filter($users, fn($u) => $u['role'] === 'admin'));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoDamg | Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
 
 </head>
 <body>
-    <header class="navbar">
-        <div class="container header-content" style="width: 100%;">
-            <a href="home.php" class="nav-logo" style="color: var(--primary-color);">
-                <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
-            </a>
-            <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                <span></span><span></span><span></span>
-            </div>
-            <nav>
-                <ul class="nav-links" id="navLinks">
-                    <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                    <li><a href="index.php"><i class="fas fa-plus"></i> New Analysis</a></li>
-                    <?php if (is_admin()): ?>
-                    <li><a href="admin.php" class="active"><i class="fas fa-shield-alt"></i> Admin</a></li>
-                    <?php endif; ?>
-                    <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-                    <li><a href="logout.php" class="nav-cta" style="color:white!important;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <div class="admin-container">
+    <?php include 'navbar.php'; ?>
+ <div class="admin-container">
         <div class="admin-header">
             <h1 class="admin-title"><i class="fas fa-shield-alt"></i> Admin Dashboard</h1>
             <div class="admin-stats">

@@ -1,23 +1,56 @@
 <?php
 // config.php — Database config, session init, helpers
 
+if (!function_exists('autodamg_load_env')) {
+    function autodamg_load_env(string $path): void {
+        if (!is_readable($path)) {
+            return;
+        }
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false) {
+            return;
+        }
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || (isset($line[0]) && $line[0] === '#')) {
+                continue;
+            }
+            $eq = strpos($line, '=');
+            if ($eq === false) {
+                continue;
+            }
+            $k = trim(substr($line, 0, $eq));
+            $v = trim(substr($line, $eq + 1));
+            if ($k === '') {
+                continue;
+            }
+            $len = strlen($v);
+            if ($len >= 2 && $v[0] === '"' && $v[$len - 1] === '"') {
+                $v = stripcslashes(substr($v, 1, -1));
+            } elseif ($len >= 2 && $v[0] === "'" && $v[$len - 1] === "'") {
+                $v = substr($v, 1, -1);
+            }
+            if (!array_key_exists($k, $_ENV)) {
+                $_ENV[$k] = $v;
+                putenv($k . '=' . $v);
+            }
+        }
+    }
+}
+
+autodamg_load_env(__DIR__ . '/.env');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$db_host    = '127.0.0.1';
-$db_name    = 'autodamg_db';
-$db_user    = 'root';
-$db_pass    = '';
-$db_charset = 'utf8mb4';
+$db_host    = $_ENV['AUTODAMG_DB_HOST'] ?? '127.0.0.1';
+$db_name    = $_ENV['AUTODAMG_DB_NAME'] ?? 'autodamg_db';
+$db_user    = $_ENV['AUTODAMG_DB_USER'] ?? 'root';
+$db_pass    = $_ENV['AUTODAMG_DB_PASS'] ?? '';
+$db_charset = $_ENV['AUTODAMG_DB_CHARSET'] ?? 'utf8mb4';
 
 try {
-    // Auto-create the database if missing
-    $pdo_init = new PDO("mysql:host=$db_host;charset=$db_charset", $db_user, $db_pass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    ]);
-    $pdo_init->exec("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-
     $dsn     = "mysql:host=$db_host;dbname=$db_name;charset=$db_charset";
     $options = [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -25,45 +58,12 @@ try {
         PDO::ATTR_EMULATE_PREPARES   => false,
     ];
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
-
-    // ── Users table — WITH role and blocked columns ───────────
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS users (
-            id              INT AUTO_INCREMENT PRIMARY KEY,
-            username        VARCHAR(80)  NOT NULL UNIQUE,
-            email           VARCHAR(120) NOT NULL UNIQUE,
-            role            ENUM('user', 'admin') DEFAULT 'user',
-            blocked         TINYINT(1) DEFAULT 0,
-            blocked_reason  VARCHAR(255) DEFAULT NULL,
-            blocked_at      DATETIME DEFAULT NULL,
-            phone           VARCHAR(30)  DEFAULT NULL,
-            password_hash   VARCHAR(256) NOT NULL,
-            profile_pic     LONGTEXT DEFAULT NULL,
-            created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB
-    ");
-
-    // ── Analyses table ─────────────────────────────────────────
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS analyses (
-            id                INT AUTO_INCREMENT PRIMARY KEY,
-            user_id           INT DEFAULT NULL,
-            filename          VARCHAR(256) NOT NULL,
-            original_filename VARCHAR(256) DEFAULT NULL,
-            file_size         BIGINT DEFAULT NULL,
-            result_json       LONGTEXT NOT NULL,
-            annotated_image   LONGTEXT DEFAULT NULL,
-            cost_min          DECIMAL(10,2) DEFAULT 0,
-            cost_max          DECIMAL(10,2) DEFAULT 0,
-            total_detections  INT DEFAULT 0,
-            is_undamaged      TINYINT(1) DEFAULT 0,
-            timestamp         DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-        ) ENGINE=InnoDB
-    ");
-
 } catch (\PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    die(
+        'Database connection failed: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8')
+        . "\n\nCreate the database and tables by importing php-app/autodamg_db.sql into MySQL, "
+        . 'or copy .env.example to .env and set AUTODAMG_DB_* credentials.'
+    );
 }
 
 // ── Auth helpers ─────────────────────────────────────────────
@@ -90,7 +90,7 @@ function require_login(): bool {
             exit;
         }
     }
-    
+
     // Block blocked users from accessing protected pages
     if (isset($_SESSION['blocked']) && $_SESSION['blocked']) {
         session_destroy();
@@ -102,7 +102,7 @@ function require_login(): bool {
         header('Location: login.php?blocked=1');
         exit;
     }
-    
+
     return true;
 }
 
@@ -143,9 +143,9 @@ function is_admin(): bool {
 }
 
 function require_admin(): bool {
-    $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+    $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-    
+
     if (!is_logged_in()) {
         if ($isAjax) {
             http_response_code(401);
@@ -156,7 +156,7 @@ function require_admin(): bool {
         header('Location: login.php');
         exit;
     }
-    
+
     if (!is_admin()) {
         if ($isAjax) {
             http_response_code(403);
@@ -182,7 +182,7 @@ function get_user_with_status(PDO $pdo, int $userId): array|false {
 function get_all_users(PDO $pdo, array $filters = []): array {
     $sql = "SELECT id, username, email, role, blocked, blocked_at, created_at FROM users WHERE 1=1";
     $params = [];
-    
+
     if (!empty($filters['search'])) {
         $sql .= " AND (username LIKE ? OR email LIKE ?)";
         $params[] = "%{$filters['search']}%";
@@ -196,14 +196,14 @@ function get_all_users(PDO $pdo, array $filters = []): array {
         $sql .= " AND blocked = ?";
         $params[] = (int)$filters['blocked'];
     }
-    
+
     $sql .= " ORDER BY created_at DESC";
-    
+
     if (!empty($filters['limit'])) {
         $sql .= " LIMIT ?";
         $params[] = (int)$filters['limit'];
     }
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();
@@ -232,13 +232,53 @@ function toggle_user_blocked(PDO $pdo, int $userId, bool $blocked, ?string $reas
         $blocked ? 1 : 0,
         $reason,
         $blocked ? date('Y-m-d H:i:s') : null,
-        $userId
+        $userId,
     ]);
 }
 
 function update_user_role(PDO $pdo, int $userId, string $role): bool {
-    if (!in_array($role, ['user', 'admin'])) return false;
+    if (!in_array($role, ['user', 'admin'])) {
+        return false;
+    }
     $stmt = $pdo->prepare("UPDATE users SET role = ? WHERE id = ?");
     return $stmt->execute([$role, $userId]);
 }
-?>
+
+// ── Upload / analysis helpers ─────────────────────────────────
+// Analysis images live in DB as data URIs. autodamg_delete_analysis_files only removes legacy
+// disk paths under uploads/ (if that folder exists); data: URIs are skipped.
+function autodamg_delete_analysis_files(?string $resultJson, ?string $annotatedImage): void {
+    $uploadRoot = realpath(__DIR__ . '/uploads');
+    if ($uploadRoot === false) {
+        return;
+    }
+
+    $tryUnlink = function (string $relative) use ($uploadRoot): void {
+        if ($relative === '' || strpos($relative, 'uploads/') !== 0) {
+            return;
+        }
+        $full = realpath(__DIR__ . '/' . str_replace('/', DIRECTORY_SEPARATOR, $relative));
+        if ($full === false || !is_file($full)) {
+            return;
+        }
+        $rootNorm = str_replace('\\', '/', $uploadRoot);
+        $fullNorm = str_replace('\\', '/', $full);
+        if (strpos($fullNorm, rtrim($rootNorm, '/')) !== 0) {
+            return;
+        }
+        @unlink($full);
+    };
+
+    $decoded = $resultJson ? json_decode($resultJson, true) : null;
+    if (is_array($decoded) && !empty($decoded['original_image']) && is_string($decoded['original_image'])) {
+        $tryUnlink($decoded['original_image']);
+    }
+    if (!empty($annotatedImage) && is_string($annotatedImage)) {
+        $tryUnlink($annotatedImage);
+    }
+}
+
+function autodamg_flask_predict_url(): string {
+    $u = $_ENV['AUTODAMG_FLASK_PREDICT_URL'] ?? '';
+    return $u !== '' ? $u : 'http://127.0.0.1:5000/predict';
+}

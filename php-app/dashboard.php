@@ -4,7 +4,13 @@ require_login();
 $user = get_current_user_data($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_analysis_id'])) {
-    $del_id = $_POST['delete_analysis_id'];
+    $del_id = (int) $_POST['delete_analysis_id'];
+    $fetch = $pdo->prepare("SELECT result_json, annotated_image FROM analyses WHERE id = ? AND user_id = ?");
+    $fetch->execute([$del_id, $user['id']]);
+    $row = $fetch->fetch();
+    if ($row) {
+        autodamg_delete_analysis_files($row['result_json'] ?? null, $row['annotated_image'] ?? null);
+    }
     $del_stmt = $pdo->prepare("DELETE FROM analyses WHERE id = ? AND user_id = ?");
     $del_stmt->execute([$del_id, $user['id']]);
     set_flash_message('success', 'Analysis record deleted successfully.');
@@ -58,27 +64,7 @@ unset($a);
 </head>
 <body>
     <div class="page-wrapper">
-        <header class="navbar" style="position: relative;">
-            <div class="container header-content" style="width: 100%;">
-                <a href="home.php" class="nav-logo" style="color: var(--primary-color);">
-                    <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
-                </a>
-                
-                <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                    <span></span><span></span><span></span>
-                </div>
-
-                <nav>
-                    <ul class="nav-links" id="navLinks">
-                        <li><a href="dashboard.php" class="active"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                        <li><a href="analytics.php"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                        <li><a href="index.php"><i class="fas fa-plus"></i> New Analysis</a></li>
-                        <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-                        <li><a href="logout.php" class="nav-cta" style="color: white !important;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+        <?php include 'navbar.php'; ?>
 
         <main class="main-content container" style="padding-top: 3rem; margin: 0 auto; max-width: 1200px;">
             <header class="page-header" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem;">

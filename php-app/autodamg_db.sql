@@ -1,6 +1,5 @@
--- AutoDamg Database Schema
--- Matches config.php auto-creation logic
--- Use this to initialize the database manually if needed
+-- AutoDamg Database Schema (source of truth for fresh installs)
+-- Import once via phpMyAdmin or: mysql < autodamg_db.sql
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -52,7 +51,9 @@ CREATE TABLE IF NOT EXISTS `analyses` (
   `filename` varchar(256) NOT NULL,
   `original_filename` varchar(256) DEFAULT NULL,
   `file_size` bigint(20) DEFAULT NULL,
+  -- result_json.original_image: user photo as data URI (base64). Legacy rows may use uploads/... paths.
   `result_json` longtext NOT NULL,
+  -- Annotated image as data URI, or legacy path uploads/annotated/...
   `annotated_image` longtext DEFAULT NULL,
   `cost_min` decimal(10,2) DEFAULT 0.00,
   `cost_max` decimal(10,2) DEFAULT 0.00,

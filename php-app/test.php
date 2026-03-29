@@ -2,7 +2,7 @@
 require_once 'config.php';
 // Index is the "New Analysis" page.
 // We can allow either guests or require login. The original Flask app required login for `/app`.
-require_login(); 
+// require_login(); 
 ?>
 <!DOCTYPE html>
 <html lang="en">

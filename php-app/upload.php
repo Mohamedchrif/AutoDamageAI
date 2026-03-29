@@ -42,11 +42,14 @@ if ($fileSize > 16 * 1024 * 1024) {
     exit;
 }
 
-// Convert original to Base64 for the frontend slider so we don't save to disk
-$originalBase64 = 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($tmpPath));
+$ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION) ?: 'jpg');
+if (strlen($ext) > 10) {
+    $ext = 'jpg';
+}
+$storedFilename = 'analysis_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
 
 // ── Call Flask AI Server ────────────────────────────────────
-$FLASK_URL = 'http://127.0.0.1:5000/predict';
+$FLASK_URL = autodamg_flask_predict_url();
 $curlFile = new CURLFile($tmpPath, $mimeType, $originalName);
 $ch = curl_init($FLASK_URL);
 curl_setopt_array($ch, [
@@ -58,7 +61,6 @@ curl_setopt_array($ch, [
 ]);
 
 $rawResponse = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $curlError = curl_error($ch);
 curl_close($ch);
 
@@ -83,49 +85,76 @@ $totalDetections = (int)($flaskData['total_detections'] ?? 0);
 $costMin = (float)($flaskData['cost_min'] ?? 0);
 $costMax = (float)($flaskData['cost_max'] ?? 0);
 $detectedIssues = $flaskData['detected_issues'] ?? [];
-$annotatedImage = $flaskData['annotated_image'] ?? ''; 
+$annotatedImage = $flaskData['annotated_image'] ?? '';
+$originalDimensions = $flaskData['original_dimensions'] ?? null;
 
-// Build result JSON for the old frontend logic which expected things inside result_json
+// ── Store images in DB only (data URIs), not on disk ───────────────────────
+// Large payloads need adequate MySQL max_allowed_packet (e.g. 64M+) and PHP memory_limit.
+if (!is_uploaded_file($tmpPath)) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'Invalid upload.']);
+    exit;
+}
+$fileBinary = file_get_contents($tmpPath);
+if ($fileBinary === false || $fileBinary === '') {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'Could not read uploaded image.']);
+    exit;
+}
+$originalDataUri = 'data:' . $mimeType . ';base64,' . base64_encode($fileBinary);
+unset($fileBinary);
+
+$annotatedStored = '';
+if ($annotatedImage !== '' && strpos($annotatedImage, 'data:') === 0) {
+    $annotatedStored = $annotatedImage;
+}
+
+// Build result JSON for the frontend (original + annotated as data URIs in DB)
 $resultJson = json_encode([
     'is_undamaged' => $isUndamaged,
     'total_detections' => $totalDetections,
     'detected_issues' => $detectedIssues,
     'cost_min' => $costMin,
     'cost_max' => $costMax,
-    'original_image' => $originalBase64
+    'original_image' => $originalDataUri,
+    'annotated_image' => $annotatedStored,
+    'original_dimensions' => $originalDimensions,
 ]);
 
-// ── Save to Database using the new schema ───────────────────
+if ($resultJson === false) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'Could not encode analysis result.']);
+    exit;
+}
+
+// ── Save to Database ────────────────────────────────────────
 try {
-    $ext = pathinfo($originalName, PATHINFO_EXTENSION) ?: 'jpg';
-    $storedFilename = 'analysis_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
-    
     $stmt = $pdo->prepare("
         INSERT INTO analyses 
-            (user_id, filename, original_filename, file_size, result_json, annotated_image, cost_min, cost_max, total_detections, is_undamaged) 
+            (user_id, filename, original_filename, file_size, result_json, annotated_image, cost_min, cost_max, total_detections, is_undamaged, timestamp) 
         VALUES 
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    
+
     $stmt->execute([
-        $_SESSION['user_id'],
-        $storedFilename,
-        $originalName,
-        $fileSize,
-        $resultJson,
-        $annotatedImage,
-        $costMin,
-        $costMax,
-        $totalDetections,
-        (int)$isUndamaged
+        $_SESSION['user_id'],          // user_id
+        $storedFilename,               // filename
+        $originalName,                 // original_filename
+        $fileSize,                     // file_size
+        $resultJson,                   // result_json
+        $annotatedStored,              // annotated_image
+        $costMin,                      // cost_min
+        $costMax,                      // cost_max
+        $totalDetections,              // total_detections
+        (int)$isUndamaged,             // is_undamaged
+        date('Y-m-d H:i:s')            // timestamp (added here)
     ]);
-    
+
     echo json_encode([
         'success' => true,
-        'analysis_id' => $pdo->lastInsertId()
+        'analysis_id' => $pdo->lastInsertId(),
     ]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
 }
-?>

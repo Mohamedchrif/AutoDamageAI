@@ -17,36 +17,7 @@ $is_auth = is_logged_in();
 </head>
 <body>
     <!-- Navigation -->
-    <header class="navbar">
-        <div class="container header-content" style="width: 100%;">
-            <a href="home.php" class="nav-logo" style="color: var(--primary-color);">
-                <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
-            </a>
-            
-            <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-
-            <nav>
-                <ul class="nav-links" id="navLinks">
-                    <?php if ($is_auth): ?>
-                        <li><a href="dashboard.php"><i class="fas fa-th-large"></i> Dashboard</a></li>
-                        <li><a href="analytics.php"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                        <li><a href="index.php"><i class="fas fa-plus"></i> New Analysis</a></li>
-                        <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-                        <li><a href="logout.php" class="nav-cta" style="color: white !important;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                    <?php else: ?>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="login.php">Login</a></li>
-                        <li><a href="signup.php" class="nav-cta" style="color: white !important;">Sign Up</a></li>
-                    <?php endif; ?>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <?php include 'navbar.php'; ?>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -68,7 +39,7 @@ $is_auth = is_logged_in();
             
             <div class="hero-stats animate delay-3">
                 <div class="stat-item">
-                    <div class="stat-value">95%+</div>
+                    <div class="stat-value">61%+</div>
                     <div class="stat-label">Accuracy</div>
                 </div>
                 <div class="stat-item">
@@ -76,7 +47,7 @@ $is_auth = is_logged_in();
                     <div class="stat-label">Processing</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">17+</div>
+                    <div class="stat-value">16+</div>
                     <div class="stat-label">Damage Types</div>
                 </div>
             </div>
@@ -105,7 +76,7 @@ $is_auth = is_logged_in();
                     <div class="feature-icon"><i class="fas fa-brain"></i></div>
                     <div class="feature-content">
                         <h3>AI-Powered Analysis</h3>
-                        <p>Advanced deep learning models detect 17+ types of damage with over 95% accuracy, trained on thousands of vehicle images.</p>
+                        <p>Advanced deep learning models detect 16+ types of damage with over 61% accuracy, trained on thousands of vehicle images.</p>
                     </div>
                 </div>
 
