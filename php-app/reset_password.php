@@ -104,6 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
             </form>
         </div>
     </div>
-    <script src="js/reset_password.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 </html>

@@ -185,6 +185,6 @@ unset($a);
         </main>
     </div>
     <script src="js/nav.js"></script>
-    <script src="js/dashboard.js"></script>
+
 </body>
 </html>

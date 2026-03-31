@@ -109,6 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
-<script src="js/signup.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>
