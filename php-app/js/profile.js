@@ -86,12 +86,15 @@ function applyCrop() {
 function toggleEditMode() {
     const viewMode = document.getElementById('profile-view');
     const editMode = document.getElementById('profile-edit');
-    if (viewMode.style.display === 'none') {
-        viewMode.style.display = 'block';
+    const isEditing = !editMode.classList.contains('d-none') || editMode.style.display === 'block';
+    if (isEditing) {
+        viewMode.style.display = '';
+        viewMode.classList.remove('d-none');
         editMode.style.display = 'none';
     } else {
         viewMode.style.display = 'none';
         editMode.style.display = 'block';
+        editMode.classList.remove('d-none');
     }
 }
 

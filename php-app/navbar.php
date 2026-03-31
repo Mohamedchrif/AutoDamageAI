@@ -13,9 +13,9 @@ $is_authenticated = is_logged_in();
 ?>
 
 <!-- Global Navbar -->
-<header class="navbar" style="position: relative;">
-    <div class="container header-content" style="width: 100%;">
-        <a href="index.php" class="nav-logo" style="color: var(--primary-color);">
+<header class="navbar navbar-relative">
+    <div class="container header-content full-width">
+        <a href="index.php" class="nav-logo text-primary">
             <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
         </a>
         

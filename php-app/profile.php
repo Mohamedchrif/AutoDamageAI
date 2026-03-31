@@ -168,32 +168,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     <div class="page-wrapper">
         <?php include 'navbar.php'; ?>
 
-        <main class="main-content container" style="padding-top: 3rem; margin: 0 auto; max-width: 1200px;">
-            <header class="page-header" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem;">
+        <main class="main-content container profile-main-container">
+            <header class="page-header profile-page-header">
                 <div>
-                    <h1 style="margin: 0; font-size: 2.25rem; font-weight: 800; color: var(--primary-color);">Account <span style="color: var(--secondary-color);">Settings</span></h1>
-                    <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 1.05rem;">Manage your identity, contact details, and security preferences.</p>
+                    <h1 class="profile-page-title">Account <span>Settings</span></h1>
+                    <p class="profile-page-subtitle">Manage your identity, contact details, and security preferences.</p>
                 </div>
-                <div class="security-badge" style="background: white; padding: 0.75rem 1.25rem; border-radius: 99px; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-                    <div style="width: 12px; height: 12px; background: var(--success-color); border-radius: 50%; box-shadow: 0 0 0 3px #dcfce7;"></div>
-                    <span style="font-size: 0.875rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em;">Security: High</span>
+                <div class="security-badge-container">
+                    <div class="security-badge-dot"></div>
+                    <span class="security-badge-text">Security: High</span>
                 </div>
             </header>
 
             <?php display_flash_messages(); ?>
 
-            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 2.5rem;">
+            <div class="card profile-outer-card">
                 <!-- Header Banner Area -->
-                <div class="profile-banner" style="height: 140px; background: linear-gradient(135deg, var(--primary-color) 0%, #1e3a5f 100%); position: relative;">
+                <div class="profile-banner">
                     <div class="profile-banner-avatar">
                         <input type="file" id="avatar_file_input" accept="image/*" hidden aria-hidden="true" tabindex="-1">
                         <button type="button" class="avatar-picker-btn" id="avatar-picker-btn" title="<?= htmlspecialchars('Change profile photo', ENT_QUOTES, 'UTF-8') ?>" aria-label="Change profile photo">
                             <?php if (!empty($user['profile_pic'])): ?>
-                                <div class="avatar-large" style="width: 100px; height: 100px; border-radius: 50%; border: 5px solid white; box-shadow: 0 8px 24px rgba(0,0,0,0.12); overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <img src="<?= htmlspecialchars($user['profile_pic'], ENT_QUOTES, 'UTF-8') ?>" alt="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                                <div class="avatar-large avatar-has-photo">
+                                    <img src="<?= htmlspecialchars($user['profile_pic'], ENT_QUOTES, 'UTF-8') ?>" alt="" class="avatar-photo-img">
                                 </div>
                             <?php else: ?>
-                                <div class="avatar-large" style="width: 100px; height: 100px; border-radius: 50%; background: var(--secondary-color); border: 5px solid white; box-shadow: 0 8px 24px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 800; color: white;">
+                                <div class="avatar-large avatar-no-photo">
                                     <?= strtoupper(substr($user['username'], 0, 1)) ?>
                                 </div>
                             <?php endif; ?>
@@ -204,15 +204,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 
                 <div class="profile-content">
                     <!-- Static Profile Info -->
-                    <div id="profile-view" style="<?= $show_edit ? 'display: none;' : '' ?>">
+                    <div id="profile-view" class="<?= $show_edit ? 'd-none' : '' ?>">
                         <div class="profile-header-view">
                             <div>
-                                <h2 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: var(--primary-color);"><?= htmlspecialchars($user['username']) ?></h2>
-                                <p style="color: var(--text-secondary); margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; background: #f8fafc; padding: 0.4rem 0.8rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
-                                    <i class="fas fa-calendar-alt" style="color: var(--secondary-color);"></i> Member since <?= isset($user['created_at']) ? date('F d, Y', strtotime($user['created_at'])) : 'Recently' ?>
+                                <h2 class="profile-view-username"><?= htmlspecialchars($user['username']) ?></h2>
+                                <p class="profile-view-member-since">
+                                    <i class="fas fa-calendar-alt"></i> Member since <?= isset($user['created_at']) ? date('F d, Y', strtotime($user['created_at'])) : 'Recently' ?>
                                 </p>
                             </div>
-                            <button onclick="toggleEditMode()" class="submit-btn" style="width: auto; padding: 0.75rem 1.75rem; font-size: 0.95rem; display: flex; align-items: center; gap: 0.6rem; margin: 0; border-radius: 0.75rem;">
+                            <button onclick="toggleEditMode()" class="submit-btn profile-edit-btn">
                                 <i class="fas fa-edit"></i> Edit Profile
                             </button>
                         </div>
@@ -220,44 +220,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                         <div class="profile-grid">
                             <!-- Left Column: Personal Information -->
                             <div class="profile-section">
-                                <h3 style="font-size: 1.1rem; margin-bottom: 1.75rem; display: flex; align-items: center; gap: 0.75rem; color: var(--primary-color); border-bottom: 2px solid #f1f5f9; padding-bottom: 0.75rem;">
-                                    <i class="fas fa-id-card" style="color: var(--secondary-color); background: #eff6ff; padding: 0.5rem; border-radius: 0.5rem;"></i>
+                                <h3 class="profile-section-title">
+                                    <i class="fas fa-id-card"></i>
                                     Personal Information
                                 </h3>
-                                <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+                                <div class="profile-info-list">
                                     <div class="info-item">
-                                        <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                                        <label class="profile-info-label">
                                             <i class="fas fa-user-circle"></i> Username
                                         </label>
-                                        <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary);"><?= htmlspecialchars($user['username']) ?></p>
+                                        <p class="profile-info-value"><?= htmlspecialchars($user['username']) ?></p>
                                     </div>
                                     <div class="info-item">
-                                        <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                                        <label class="profile-info-label">
                                             <i class="fas fa-envelope"></i> Email Address
                                         </label>
-                                        <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary);"><?= htmlspecialchars($user['email']) ?></p>
+                                        <p class="profile-info-value"><?= htmlspecialchars($user['email']) ?></p>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Right Column: Contact & Status -->
                             <div class="profile-section">
-                                <h3 style="font-size: 1.1rem; margin-bottom: 1.75rem; display: flex; align-items: center; gap: 0.75rem; color: var(--primary-color); border-bottom: 2px solid #f1f5f9; padding-bottom: 0.75rem;">
-                                    <i class="fas fa-shield-alt" style="color: var(--secondary-color); background: #eff6ff; padding: 0.5rem; border-radius: 0.5rem;"></i>
+                                <h3 class="profile-section-title">
+                                    <i class="fas fa-shield-alt"></i>
                                     Security & Status
                                 </h3>
-                                <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+                                <div class="profile-info-list">
                                     <div class="info-item">
-                                        <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                                        <label class="profile-info-label">
                                             <i class="fas fa-phone"></i> Phone Number
                                         </label>
-                                        <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary);"><?= !empty($user['phone']) ? htmlspecialchars($user['phone']) : 'Not provided' ?></p>
+                                        <p class="profile-info-value"><?= !empty($user['phone']) ? htmlspecialchars($user['phone']) : 'Not provided' ?></p>
                                     </div>
                                     <div class="info-item">
-                                        <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                                        <label class="profile-info-label">
                                             <i class="fas fa-check-double"></i> Account Status
                                         </label>
-                                        <p style="font-size: 1.1rem; font-weight: 600; color: var(--success-color); display: flex; align-items: center; gap: 0.5rem;">
+                                        <p class="profile-info-value profile-success-text">
                                             <i class="fas fa-verified"></i> Verified & Active
                                         </p>
                                     </div>
@@ -267,61 +267,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                     </div>
 
                     <!-- Edit Profile Form (Hidden by default) -->
-                    <div id="profile-edit" style="<?= $show_edit ? 'display: block;' : 'display: none;' ?> animation: fadeIn 0.3s ease;">
-                        <style>
-                            @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-                            .edit-actions { display: flex; gap: 1rem; margin-top: 3rem; }
-                            .btn-cancel { background: white; border: 2px solid var(--border-color); color: var(--text-secondary); border-radius: 0.75rem; padding: 0.8rem 1.75rem; cursor: pointer; font-weight: 700; transition: all 0.2s; font-size: 0.95rem; }
-                            .btn-cancel:hover { background: #f8fafc; color: var(--primary-color); border-color: #cbd5e1; }
-                            .toggle-password { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-secondary); padding: 0; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: color 0.2s; z-index: 10; }
-                            .toggle-password:hover { color: var(--secondary-color); }
-                        </style>
-                        <div style="margin-bottom: 2.5rem;">
-                            <h2 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: var(--primary-color);">Edit Profile Details</h2>
-                            <p style="color: var(--text-secondary); margin-top: 0.4rem;">Keep your information up to date. To change your photo, use your profile picture above.</p>
+                    <div id="profile-edit" class="profile-edit-section <?= $show_edit ? '' : 'd-none' ?>">
+                        <div class="profile-edit-header">
+                            <h2>Edit Profile Details</h2>
+                            <p>Keep your information up to date. To change your photo, use your profile picture above.</p>
                         </div>
 
                         <form action="profile.php" method="POST">
                             <div class="profile-edit-grid">
                                 <div class="form-group">
-                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Username</label>
-                                    <div class="input-with-icon" style="position: relative;">
-                                        <i class="fas fa-user" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="text" name="username" class="form-input" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s;" value="<?= htmlspecialchars($user['username']) ?>" required>
+                                    <label class="form-label profile-edit-label">Username</label>
+                                    <div class="input-with-icon profile-input-wrapper">
+                                        <i class="fas fa-user profile-input-icon"></i>
+                                        <input type="text" name="username" class="form-input profile-form-input" value="<?= htmlspecialchars($user['username']) ?>" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Email Address</label>
-                                    <div class="input-with-icon" style="position: relative;">
-                                        <i class="fas fa-envelope" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="email" name="email" class="form-input" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s;" value="<?= htmlspecialchars($user['email']) ?>" required>
+                                    <label class="form-label profile-edit-label">Email Address</label>
+                                    <div class="input-with-icon profile-input-wrapper">
+                                        <i class="fas fa-envelope profile-input-icon"></i>
+                                        <input type="email" name="email" class="form-input profile-form-input" value="<?= htmlspecialchars($user['email']) ?>" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Phone Number</label>
-                                    <div class="input-with-icon" style="position: relative;">
-                                        <i class="fas fa-phone" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="tel" name="phone" class="form-input" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s;" value="<?= htmlspecialchars($user['phone']) ?>" placeholder="+1 (555) 000-0000">
+                                    <label class="form-label profile-edit-label">Phone Number</label>
+                                    <div class="input-with-icon profile-input-wrapper">
+                                        <i class="fas fa-phone profile-input-icon"></i>
+                                        <input type="tel" name="phone" class="form-input profile-form-input" value="<?= htmlspecialchars($user['phone']) ?>" placeholder="+1 (555) 000-0000">
                                     </div>
                                 </div>
                             </div>
                             <div class="edit-actions">
-                                <button type="submit" class="submit-btn" style="width: 170px; height: 48px; box-sizing: border-box; border: 2px solid transparent; padding: 0; margin: 0; border-radius: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <button type="submit" class="submit-btn profile-action-btn">
                                     <i class="fas fa-save"></i> Save Changes
                                 </button>
-                                <button type="button" onclick="toggleEditMode()" class="btn-cancel" style="width: 170px; height: 48px; box-sizing: border-box; padding: 0; margin: 0; border-radius: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center;">
+                                <button type="button" onclick="toggleEditMode()" class="btn-cancel profile-action-btn">
                                     Cancel
                                 </button>
                             </div>
                         </form>
 
-                        <hr style="margin: 3.5rem 0 2.5rem 0; border: none; border-top: 2px dashed #e2e8f0;">
+                        <hr class="profile-divider">
 
-                        <div id="password-section" style="margin-bottom: 2rem;">
-                            <h2 style="margin: 0; font-size: 1.65rem; font-weight: 800; color: var(--primary-color); display: flex; align-items: center; gap: 0.75rem;">
-                                <i class="fas fa-key" style="color: var(--secondary-color);"></i> Change Password
+                        <div id="password-section" class="profile-password-header">
+                            <h2>
+                                <i class="fas fa-key"></i> Change Password
                             </h2>
-                            <p style="color: var(--text-secondary); margin-top: 0.4rem;">Ensure your account is using a secure, random password.</p>
+                            <p>Ensure your account is using a secure, random password.</p>
                         </div>
                         
                         <form action="profile.php" method="POST">
@@ -329,36 +321,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                             
                             <?php display_flash_messages('password_inline'); ?>
                             
-                            <div class="profile-edit-grid" style="margin-bottom: 1.5rem;">
-                                <div class="form-group" style="grid-column: 1 / -1;">
-                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Current Password</label>
-                                    <div class="input-with-icon" style="position: relative;">
-                                        <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="password" id="current_password" name="current_password" class="form-input" style="width: 100%; padding: 0.875rem 3rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                            <div class="profile-edit-grid profile-password-grid">
+                                <div class="form-group full-width-group">
+                                    <label class="form-label profile-edit-label">Current Password</label>
+                                    <div class="input-with-icon profile-input-wrapper">
+                                        <i class="fas fa-lock profile-input-icon"></i>
+                                        <input type="password" id="current_password" name="current_password" class="form-input profile-form-input" required>
                                         <button type="button" class="toggle-password" onclick="togglePassword('current_password', this)" title="Toggle visibility"><i class="fas fa-eye"></i></button>
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">New Password</label>
-                                    <div class="input-with-icon" style="position: relative;">
-                                        <i class="fas fa-shield-alt" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="password" id="new_password" name="new_password" class="form-input" minlength="8" style="width: 100%; padding: 0.875rem 3rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                    <label class="form-label profile-edit-label">New Password</label>
+                                    <div class="input-with-icon profile-input-wrapper">
+                                        <i class="fas fa-shield-alt profile-input-icon"></i>
+                                        <input type="password" id="new_password" name="new_password" class="form-input profile-form-input" minlength="8" required>
                                         <button type="button" class="toggle-password" onclick="togglePassword('new_password', this)" title="Toggle visibility"><i class="fas fa-eye"></i></button>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Confirm New Password</label>
-                                    <div class="input-with-icon" style="position: relative;">
-                                        <i class="fas fa-check" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="password" id="confirm_password" name="confirm_password" class="form-input" minlength="8" style="width: 100%; padding: 0.875rem 3rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                    <label class="form-label profile-edit-label">Confirm New Password</label>
+                                    <div class="input-with-icon profile-input-wrapper">
+                                        <i class="fas fa-check profile-input-icon"></i>
+                                        <input type="password" id="confirm_password" name="confirm_password" class="form-input profile-form-input" minlength="8" required>
                                         <button type="button" class="toggle-password" onclick="togglePassword('confirm_password', this)" title="Toggle visibility"><i class="fas fa-eye"></i></button>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="edit-actions" style="margin-top: 2rem;">
-                                <button type="submit" class="submit-btn" style="width: 170px; height: 48px; box-sizing: border-box; border: 2px solid transparent; padding: 0; margin: 0; border-radius: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--secondary-color);">
+                            <div class="edit-actions password-actions">
+                                <button type="submit" class="submit-btn profile-action-btn btn-secondary-bg">
                                     <i class="fas fa-lock"></i> Update Password
                                 </button>
                             </div>
@@ -368,18 +360,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
             </div>
 
             <div class="danger-card danger-card-inner">
-                <div style="display: flex; gap: 1.5rem; align-items: center;">
-                    <div style="width: 56px; height: 56px; background: #fee2e2; border-radius: 1rem; display: flex; align-items: center; justify-content: center; color: var(--danger-color); font-size: 1.5rem;">
+                <div class="danger-card-header">
+                    <div class="danger-card-icon">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <div>
-                        <h4 style="color: var(--danger-color); font-size: 1.25rem; font-weight: 800; margin-bottom: 0.35rem;">Danger Zone: Delete Account</h4>
-                        <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0; max-width: 500px;">Permanently delete your account and all associated damage analyses. This action cannot be recovered or undone.</p>
+                    <div class="danger-card-text">
+                        <h4>Danger Zone: Delete Account</h4>
+                        <p>Permanently delete your account and all associated damage analyses. This action cannot be recovered or undone.</p>
                     </div>
                 </div>
-                <form action="profile.php" method="POST" id="delete-form" style="margin: 0;">
+                <form action="profile.php" method="POST" id="delete-form" class="danger-card-form">
                     <input type="hidden" name="delete_account" value="1">
-                    <button type="button" onclick="confirmDelete()" style="background: white; color: var(--danger-color); border: 2px solid #fca5a5; padding: 0.875rem 2rem; border-radius: 0.875rem; cursor: pointer; font-weight: 700; transition: all 0.2s; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='#fee2e2'; this.style.borderColor='var(--danger-color)'" onmouseout="this.style.background='white'; this.style.borderColor='#fca5a5'">
+                    <button type="button" onclick="confirmDelete()" class="btn-danger-outline">
                         <i class="fas fa-trash-alt"></i> Delete Account
                     </button>
                 </form>
@@ -388,15 +380,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     </div>
 
     <!-- Cropper Modal -->
-    <div id="crop-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px;">
-            <h3 style="margin: 0; color: var(--primary-color);">Adjust Profile Picture</h3>
-            <div style="width: 100%; height: 350px; background: #f8fafc; border-radius: 8px; overflow: hidden;">
-                <img id="image-to-crop" src="" style="max-width: 100%; display: block;">
+    <div id="crop-modal" class="cropper-modal-overlay">
+        <div class="cropper-modal-content">
+            <h3>Adjust Profile Picture</h3>
+            <div class="cropper-img-container">
+                <img id="image-to-crop" src="">
             </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
-                <button type="button" onclick="cancelCrop()" class="btn-cancel" style="width: 140px; height: 48px; box-sizing: border-box; padding: 0; margin: 0; border-radius: 0.75rem; font-family: inherit; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: center;">Cancel</button>
-                <button type="button" onclick="applyCrop()" class="submit-btn" style="width: 140px; height: 48px; box-sizing: border-box; border: 2px solid transparent; padding: 0; margin: 0; border-radius: 0.75rem; font-family: inherit; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><i class="fas fa-crop"></i> Apply</button>
+            <div class="cropper-modal-actions">
+                <button type="button" onclick="cancelCrop()" class="btn-cancel cropper-btn">Cancel</button>
+                <button type="button" onclick="applyCrop()" class="submit-btn cropper-btn"><i class="fas fa-crop"></i> Apply</button>
             </div>
         </div>
     </div>

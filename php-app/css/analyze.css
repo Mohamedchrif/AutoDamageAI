@@ -241,201 +241,6 @@ body { background: #f8fafc; }
     align-items: center;
     gap: 0.75rem;
     font-size: 0.9rem;
-    max-width: 640px;
-}
-
-/* Tabs */
-.upload-tabs {
-    display: flex;
-    background: #f1f5f9;
-    border-radius: 0.75rem;
-    padding: 0.25rem;
-    margin-bottom: 2.5rem;
-}
-.tab-btn {
-    flex: 1;
-    padding: 0.75rem;
-    border: none;
-    background: transparent;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-.tab-btn.active {
-    background: white;
-    color: var(--primary-color);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-/* Drop Zone */
-.drop-zone {
-    border: 2px dashed #cbd5e1;
-    border-radius: 1.25rem;
-    padding: 3.5rem 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    background: #f8fafc;
-    position: relative;
-}
-.drop-zone:hover, .drop-zone.drag-over {
-    border-color: var(--secondary-color);
-    background: #eff6ff;
-}
-.drop-zone.drag-over { transform: scale(1.02); }
-.drop-zone-icon {
-    width: 80px; height: 80px;
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-    border-radius: 1.25rem;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 1.5rem;
-}
-.drop-zone-icon i { font-size: 2rem; color: var(--secondary-color); }
-.drop-zone h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
-.drop-zone p { color: var(--text-secondary); font-size: 0.9rem; }
-.drop-zone .browse-link { color: var(--secondary-color); font-weight: 700; }
-
-/* File Preview */
-.file-preview {
-    display: none;
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
-    border-radius: 1rem;
-    padding: 1.25rem 1.5rem;
-    margin-top: 1.5rem;
-    align-items: center;
-    gap: 1rem;
-}
-.file-preview.visible { display: flex; }
-.file-preview-icon {
-    width: 48px; height: 48px;
-    background: var(--secondary-color);
-    border-radius: 0.75rem;
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 1.25rem; flex-shrink: 0;
-}
-.file-preview-info { flex: 1; }
-.file-preview-info strong { display: block; color: var(--primary-color); font-size: 0.95rem; }
-.file-preview-info span { font-size: 0.8rem; color: var(--text-secondary); }
-
-/* Analyze Button */
-.analyze-btn {
-    width: 100%;
-    padding: 1.1rem;
-    background: linear-gradient(135deg, var(--primary-color), #1e3a5f);
-    color: white;
-    border: none;
-    border-radius: 1rem;
-    font-size: 1.05rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-}
-.analyze-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.35);
-    background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
-}
-.analyze-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Camera Section */
-.camera-area {
-    border-radius: 1rem;
-    overflow: hidden;
-    background: var(--primary-color);
-    position: relative;
-    aspect-ratio: 4/3;
-}
-#video-preview { width: 100%; height: 100%; object-fit: cover; }
-.camera-controls { display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap; }
-.cam-btn {
-    flex: 1;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 0.75rem;
-    font-weight: 600;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-.cam-btn-primary { background: var(--secondary-color); color: white; }
-.cam-btn-capture { background: var(--danger-color); color: white; }
-.cam-btn-secondary { background: #f1f5f9; color: var(--text-primary); }
-.cam-btn:hover:not(:disabled) { opacity: 0.85; }
-.cam-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* Loading Overlay */
-.loading-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.95);
-    z-index: 9999;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-}
-.loading-overlay.active { display: flex; }
-.loading-spinner {
-    width: 80px; height: 80px;
-    border: 4px solid #e2e8f0;
-    border-top-color: var(--secondary-color);
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
-.loading-sub { font-size: 0.95rem; color: var(--text-secondary); }
-
-/* Error Card */
-.error-card {
-    display: none;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    margin-top: 1.5rem;
-    text-align: center;
-    color: #991b1b;
-}
-
-/* Footer Strip */
-.trust-bar {
-    display: flex;
-    justify-content: center;
-    gap: 3rem;
-    padding: 2.5rem;
-    border-top: 1px solid var(--border-color);
-    background: white;
-}
-.trust-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-secondary);
 }
@@ -451,11 +256,11 @@ body { background: #f8fafc; }
     border-radius: 1rem;
   }
   .hero-title {
-    font-size: 1.75rem; /* Reduced from 2rem to ensure it fits nicely on very small screens */
+    font-size: 1.75rem;
     margin-bottom: 0.75rem;
   }
   .hero-subtitle {
-    font-size: 1rem; /* Slightly smaller for better readability on mobile */
+    font-size: 1rem;
     margin-bottom: 2.5rem;
   }
   .camera-controls {
@@ -464,7 +269,7 @@ body { background: #f8fafc; }
   }
   .cam-btn {
     width: 100% !important;
-    padding: 1.25rem 1rem !important; /* Thick padding for thumb tap */
+    padding: 1.25rem 1rem !important;
     font-size: 1rem;
   }
   .analyze-btn {
@@ -485,7 +290,7 @@ body { background: #f8fafc; }
   }
 }
 
-/* Live camera tab: short hint (getUserMedia, not gallery) */
+/* Live camera tab */
 .camera-live-hint {
     font-size: 0.9rem;
     color: var(--text-secondary);
@@ -493,6 +298,26 @@ body { background: #f8fafc; }
     margin: 0 0 1.25rem;
     text-align: center;
 }
-.camera-live-hint strong {
-    color: var(--primary-color);
-}
+.camera-live-hint strong { color: var(--primary-color); }
+
+/* --- Extracted inline styles --- */
+.text-slate-sm { font-size: 0.8rem; color: #94a3b8; margin-top: 0.75rem; }
+.remove-link { color: var(--danger-color); font-size: 0.85rem; font-weight: 600; }
+.remove-link i, .icon-mr { margin-right: 0.25rem; }
+.error-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+.native-camera-area { cursor: default; pointer-events: none; margin-bottom: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 250px; padding: 1.5rem; }
+.native-preview-wrapper { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
+.native-preview-img { max-width: 100%; max-height: 220px; border-radius: 0.75rem; object-fit: contain; box-shadow: 0 4px 12px rgba(0,0,0,0.1); pointer-events: auto; }
+.native-remove-btn { color: var(--danger-color); font-size: 0.9rem; font-weight: 600; margin-top: 12px; pointer-events: auto; text-decoration: none; }
+.native-placeholder { text-align: center; }
+.native-placeholder-icon { margin: 0 auto 1rem; }
+.native-placeholder-title { font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--primary-color); }
+.native-placeholder-text { color: var(--text-secondary); font-size: 0.9rem; }
+
+.native-open-btn { width: 100%; display: flex; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 1rem; background: var(--primary-color); color: white; border: none; cursor: pointer; align-items: center; gap: 8px; }
+.native-error { margin-top: 1rem; }
+.native-analyze-btn { display: none; margin-top: 1rem; width: 100%; justify-content: center; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 1rem; background: #10b981; color: white; border: none; cursor: pointer; align-items: center; gap: 8px; }
+
+/* Global utility */
+.d-none { display: none !important; }

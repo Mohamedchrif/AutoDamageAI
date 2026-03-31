@@ -273,6 +273,10 @@ body { background: #f1f5f9; }
 .pdf-total span    { color: #2563eb; }
 .pdf-footer        { margin-top: 40px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 15px; }
 
+/* --- Extracted PDF Inline Styles --- */
+.pdf-text-right { text-align: right; }
+.pdf-no-damage-cell { text-align: center; color: #64748b; }
+
 /* ── Mobile Responsiveness ──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .result-container  { padding: 0; }

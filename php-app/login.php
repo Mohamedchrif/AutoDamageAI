@@ -59,11 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="auth-content">
             <div class="login-card">
                 <div class="login-header">
-                    <a href="index.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
+                    <a href="index.php" class="nav-logo login-logo">
                         <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
                     </a>
                     <h2>Welcome Back</h2>
-                    <p style="color: var(--text-secondary); margin-top: 0.5rem;">Sign in to access your dashboard</p>
+                    <p class="login-subtitle">Sign in to access your dashboard</p>
                 </div>
 
                 <?php display_flash_messages(); ?>
@@ -88,12 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" id="remember" name="remember" style="width: 1rem; height: 1rem;">
-                            <label for="remember" style="margin-bottom: 0; font-size: 0.875rem; cursor: pointer;">Remember me</label>
+                    <div class="remember-forgot-row">
+                        <div class="remember-wrapper">
+                            <input type="checkbox" id="remember" name="remember" class="remember-checkbox">
+                            <label for="remember" class="remember-label">Remember me</label>
                         </div>
-                        <a href="forgot_password.php" style="font-size: 0.875rem; color: var(--secondary-color); text-decoration: none; font-weight: 500;">Forgot password?</a>
+                        <a href="forgot_password.php" class="forgot-pw-link">Forgot password?</a>
                     </div>
 
                     <button type="submit" class="submit-btn">Login to Account</button>

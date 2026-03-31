@@ -67,13 +67,13 @@ unset($a);
     <div class="page-wrapper">
         <?php include 'navbar.php'; ?>
 
-        <main class="main-content container" style="padding-top: 3rem; margin: 0 auto; max-width: 1200px;">
-            <header class="page-header" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem;">
+        <main class="main-content container dashboard-main">
+            <header class="page-header dashboard-header">
                 <div>
-                    <h1 style="margin: 0; font-size: 2.25rem; font-weight: 800; color: var(--primary-color);">Welcome Back, <span style="color: var(--secondary-color);"><?= htmlspecialchars($user['username']) ?></span></h1>
-                    <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 1.05rem;">Review your latest vehicle inspection matches and history.</p>
+                    <h1 class="dashboard-title">Welcome Back, <span><?= htmlspecialchars($user['username']) ?></span></h1>
+                    <p class="dashboard-subtitle">Review your latest vehicle inspection matches and history.</p>
                 </div>
-                <a href="analyze.php" class="submit-btn" style="margin: 0; width: auto; padding: 0.8rem 1.75rem; text-decoration: none; display: flex; align-items: center; gap: 0.6rem; border-radius: 0.75rem;">
+                <a href="analyze.php" class="submit-btn dashboard-new-btn">
                     <i class="fas fa-plus-circle"></i> New Analysis
                 </a>
             </header>
@@ -87,22 +87,22 @@ unset($a);
                 </div>
                 <div class="stat-card">
                     <h3>High Severity</h3>
-                    <div class="value" style="color: var(--danger-color);">
+                    <div class="value val-danger">
                         <?= $high_count ?>
                     </div>
                 </div>
                 <div class="stat-card">
                     <h3>System Status</h3>
-                    <div class="value" style="color: var(--success-color); font-size: 1.5rem;">
+                    <div class="value val-success">
                         <i class="fas fa-check-circle"></i> Operational
                     </div>
                 </div>
             </div>
 
             <div class="history-table-card">
-                <div style="padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: white;">
-                    <h2 style="font-size: 1.25rem; margin: 0;">Inspection History</h2>
-                    <div style="font-size: 0.875rem; color: var(--text-secondary);">Total <?= $total_analyses ?> entries</div>
+                <div class="history-header">
+                    <h2 class="history-title">Inspection History</h2>
+                    <div class="history-count">Total <?= $total_analyses ?> entries</div>
                 </div>
                 
                 <div class="table-responsive">
@@ -113,17 +113,17 @@ unset($a);
                                 <th>File Name</th>
                                 <th>Findings</th>
                                 <th>Severity Status</th>
-                                <th style="text-align: right;">Actions</th>
+                                <th class="text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (count($analyses) > 0): ?>
                                 <?php foreach ($analyses as $analysis): ?>
                                     <tr>
-                                        <td style="font-weight: 500;" data-label="Date & Time"><?= date('M d, Y • H:i', strtotime($analysis['timestamp'])) ?></td>
-                                        <td style="color: var(--text-secondary);" data-label="File Name"><?= htmlspecialchars($analysis['filename']) ?></td>
+                                        <td class="td-date" data-label="Date & Time"><?= date('M d, Y • H:i', strtotime($analysis['timestamp'])) ?></td>
+                                        <td class="td-file" data-label="File Name"><?= htmlspecialchars($analysis['filename']) ?></td>
                                         <td data-label="Findings">
-                                            <span style="font-weight: 700; color: var(--primary-color);"><?= $analysis['result']['total_detections'] ?? 0 ?></span> detections
+                                            <span class="td-detections"><?= $analysis['result']['total_detections'] ?? 0 ?></span> detections
                                         </td>
                                         <td data-label="Severity Status">
                                             <?php $det = $analysis['result']['total_detections'] ?? 0; ?>
@@ -135,12 +135,12 @@ unset($a);
                                                 <span class="status-badge status-clear"><i class="fas fa-check"></i> Clear</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td style="text-align: right;" data-label="Actions">
-                                            <div style="display: flex; gap: 1rem; justify-content: flex-end; align-items: center;">
+                                        <td class="text-right" data-label="Actions">
+                                            <div class="action-buttons">
                                                 <a href="result.php?id=<?= $analysis['id'] ?>" class="action-link"><i class="fas fa-file-alt"></i> Report</a>
-                                                <form method="POST" action="dashboard.php" style="margin:0; display:inline;" onsubmit="return confirm('Are you sure you want to permanently delete this report?');">
+                                                <form method="POST" action="dashboard.php" class="form-inline" onsubmit="return confirm('Are you sure you want to permanently delete this report?');">
                                                     <input type="hidden" name="delete_analysis_id" value="<?= $analysis['id'] ?>">
-                                                    <button type="submit" style="background:none; border:none; color:var(--danger-color); cursor:pointer; font-size:1.1rem; padding:0.25rem;" title="Delete">
+                                                    <button type="submit" class="btn-delete" title="Delete">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
@@ -150,13 +150,13 @@ unset($a);
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="5" style="text-align: center; padding: 5rem 2rem;">
-                                        <div style="margin-bottom: 1rem; opacity: 0.2;">
-                                            <i class="fas fa-folder-open" style="font-size: 4rem;"></i>
+                                    <td colspan="5" class="empty-state">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-folder-open"></i>
                                         </div>
-                                        <h3 style="color: var(--text-secondary); margin-bottom: 0.5rem;">No History Found</h3>
-                                        <p style="color: var(--text-secondary); font-size: 0.875rem;">Your analyzed vehicle photos will appear here.</p>
-                                        <a href="analyze.php" class="submit-btn" style="width: auto; display: inline-flex; margin-top: 1.5rem; text-decoration: none; padding: 0.8rem 2rem; border-radius: 0.75rem;">Start First Analysis</a>
+                                        <h3 class="empty-title">No History Found</h3>
+                                        <p class="empty-text">Your analyzed vehicle photos will appear here.</p>
+                                        <a href="analyze.php" class="submit-btn empty-btn">Start First Analysis</a>
                                     </td>
                                 </tr>
                             <?php endif; ?>
@@ -166,17 +166,17 @@ unset($a);
 
                 <!-- Pagination Controls -->
                 <?php if ($total_pages > 1): ?>
-                <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; gap: 0.75rem; background: white;">
+                <div class="pagination-wrapper">
                     <?php if ($page > 1): ?>
-                    <a href="?page=<?= $page - 1 ?>" class="submit-btn" style="width: auto; margin:0; padding: 0.6rem 1rem; border-radius: 0.5rem; background: #f8fafc; color: var(--text-primary); border: 1px solid var(--border-color);"><i class="fas fa-chevron-left"></i> Prev</a>
+                    <a href="?page=<?= $page - 1 ?>" class="submit-btn btn-page"><i class="fas fa-chevron-left"></i> Prev</a>
                     <?php endif; ?>
                     
-                    <span style="font-weight: 600; color: var(--text-secondary); padding: 0 0.5rem; font-size: 0.95rem;">
+                    <span class="page-info">
                         Page <?= $page ?> of <?= $total_pages ?>
                     </span>
                     
                     <?php if ($page < $total_pages): ?>
-                    <a href="?page=<?= $page + 1 ?>" class="submit-btn" style="width: auto; margin:0; padding: 0.6rem 1rem; border-radius: 0.5rem; background: #f8fafc; color: var(--text-primary); border: 1px solid var(--border-color);">Next <i class="fas fa-chevron-right"></i></a>
+                    <a href="?page=<?= $page + 1 ?>" class="submit-btn btn-page">Next <i class="fas fa-chevron-right"></i></a>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>

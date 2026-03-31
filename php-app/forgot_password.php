@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
 
         <div class="login-card">
             <div class="login-header">
-                <a href="index.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
+                <a href="index.php" class="nav-logo login-logo">
                     <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
                 </a>
                 <h2>Password Recovery</h2>
@@ -91,9 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
 
             <div class="footer-text">
                 <p>Remembered? <a href="login.php">Back to Login</a></p>
-                <div style="margin-top: 1.5rem;">
-                    <a href="index.php" style="font-size: 0.85rem; opacity: 0.8;">
-                        <i class="fas fa-chevron-left" style="font-size: 0.7rem;"></i> Exit to Home
+                <div class="exit-home-wrapper">
+                    <a href="index.php" class="exit-home-link">
+                        <i class="fas fa-chevron-left exit-home-icon"></i> Exit to Home
                     </a>
                 </div>
             </div>

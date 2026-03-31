@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="auth-page">
         <div class="login-card">
             <div class="login-header">
-                <a href="index.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
+                <a href="index.php" class="nav-logo verify-logo">
                     <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
                 </a>
                 <h2>Check your email</h2>
@@ -89,9 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="footer-text">
                 <p>Didn't receive a code? <a href="forgot_password.php">Resend Code</a></p>
-                <div style="margin-top: 1.5rem;">
-                    <a href="login.php" style="font-size: 0.85rem; opacity: 0.8;">
-                        <i class="fas fa-chevron-left" style="font-size: 0.7rem;"></i> Back to Login
+                <div class="back-to-login-wrapper">
+                    <a href="login.php" class="back-to-login-link">
+                        <i class="fas fa-chevron-left back-to-login-icon"></i> Back to Login
                     </a>
                 </div>
             </div>

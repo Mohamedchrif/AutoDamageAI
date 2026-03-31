@@ -598,3 +598,27 @@ footer {
         margin: 0;
     }
 }
+
+/* --- Extracted inline styles --- */
+.hero-btn-override {
+    width: auto;
+    padding: 1rem 2.5rem;
+}
+
+.icon-mr {
+    margin-right: 0.5rem;
+}
+
+.hidden-tag {
+    display: none;
+}
+
+.footer-desc {
+    margin-top: 1rem;
+}
+
+.copyright-desc {
+    margin-top: 0.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}

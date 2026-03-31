@@ -51,11 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="auth-content">
             <div class="signup-card">
                 <div class="signup-header">
-                    <a href="index.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
+                    <a href="index.php" class="nav-logo signup-logo">
                         <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
                     </a>
                     <h2>Create Account</h2>
-                    <p style="color: var(--text-secondary); margin-top: 0.5rem;">Join our professional repair network</p>
+                    <p class="signup-subtitle">Join our professional repair network</p>
                 </div>
 
                 <?php display_flash_messages(); ?>
@@ -96,11 +96,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
-                        By creating an account, you agree to our <a href="#" style="color: var(--secondary-color); text-decoration: none; font-weight: 500;">Terms</a> and <a href="#" style="color: var(--secondary-color); text-decoration: none; font-weight: 500;">Privacy</a>.
+                    <p class="terms-text">
+                        By creating an account, you agree to our <a href="#" class="terms-link">Terms</a> and <a href="#" class="terms-link">Privacy</a>.
                     </p>
 
-                    <button type="submit" class="submit-btn" style="text-transform: uppercase; letter-spacing: 0.05em;">Get Started Now</button>
+                    <button type="submit" class="submit-btn btn-uppercase">Get Started Now</button>
                 </form>
 
                 <div class="footer-text">

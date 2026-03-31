@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
         
         <div class="login-card">
             <div class="login-header">
-                <a href="index.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
+                <a href="index.php" class="nav-logo reset-password-logo">
                     <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
                 </a>
                 <h2>Create new password</h2>
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn" style="margin-top: 2rem;">
+                <button type="submit" class="submit-btn submit-reset-btn">
                     <span>Change Password</span>
                     <i class="fas fa-check-circle"></i>
                 </button>

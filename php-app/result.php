@@ -246,7 +246,7 @@ $pdfPayload = [
                     <tr>
                         <th>Damage Type</th>
                         <th>Severity</th>
-                        <th style="text-align:right;">Cost Estimate</th>
+                        <th class="pdf-text-right">Cost Estimate</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -255,11 +255,11 @@ $pdfPayload = [
                     <tr>
                         <td><?= htmlspecialchars($issue['class']) ?></td>
                         <td class="pdf-sev-<?= $issue['severity'] ?>"><?= htmlspecialchars($issue['severity']) ?></td>
-                        <td style="text-align:right;">$<?= $issue['cost_min'] ?> - $<?= $issue['cost_max'] ?></td>
+                        <td class="pdf-text-right">$<?= $issue['cost_min'] ?> - $<?= $issue['cost_max'] ?></td>
                     </tr>
                     <?php endforeach; ?>
                     <?php else: ?>
-                    <tr><td colspan="3" style="text-align:center; color:#64748b;">No damage detected.</td></tr>
+                    <tr><td colspan="3" class="pdf-no-damage-cell">No damage detected.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

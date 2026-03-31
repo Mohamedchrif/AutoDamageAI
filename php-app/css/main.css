@@ -63,6 +63,12 @@ h1, h2, h3, h4 {
   font-size: 1rem;
 }
 
+/* Helper Classes */
+.text-primary { color: var(--primary-color) !important; }
+.full-width { width: 100% !important; }
+.navbar-relative { position: relative !important; }
+.d-none { display: none !important; }
+
 /* Flash Messages */
 .flash-messages {
   margin-bottom: 2rem;

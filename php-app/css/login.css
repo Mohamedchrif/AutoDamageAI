@@ -161,6 +161,49 @@
             border-color: #dcfce7;
         }
 
+        /* --- Extracted inline styles --- */
+        .login-logo {
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .remember-forgot-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .remember-checkbox {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .remember-label {
+            margin-bottom: 0;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .forgot-pw-link {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
         @media (max-width: 1024px) {
             .auth-image {
                 display: none;

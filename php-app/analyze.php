@@ -57,7 +57,7 @@ require_login();
                         <div class="drop-zone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                         <h3>Drop your image here</h3>
                         <p>or <span class="browse-link">browse files</span> from your computer</p>
-                        <p style="font-size:0.8rem; color:#94a3b8; margin-top:0.75rem;">JPG, PNG, WEBP &mdash; Max 16 MB</p>
+                        <p class="text-slate-sm">JPG, PNG, WEBP &mdash; Max 16 MB</p>
                         <input type="file" id="file-input" name="image" accept="image/*" hidden>
                     </div>
                     <div class="file-preview" id="file-preview">
@@ -66,10 +66,10 @@ require_login();
                             <strong id="preview-name"></strong>
                             <span id="preview-meta"></span>
                         </div>
-                        <a href="#" onclick="clearFile(event)" style="color:var(--danger-color); font-size:0.85rem; font-weight:600;"><i class="fas fa-times" style="margin-right:0.25rem;"></i>Remove</a>
+                        <a href="#" onclick="clearFile(event)" class="remove-link"><i class="fas fa-times"></i>Remove</a>
                     </div>
                     <div class="error-card" id="error-card">
-                        <i class="fas fa-exclamation-circle" style="font-size:1.5rem;margin-bottom:0.5rem;"></i>
+                        <i class="fas fa-exclamation-circle error-icon"></i>
                         <div id="error-message"></div>
                     </div>
                     <button type="submit" class="analyze-btn" id="analyze-btn" disabled>
@@ -81,30 +81,30 @@ require_login();
             <!-- Camera Tab: Native Device Camera -->
             <div id="camera-tab" class="tab-content">
                 <p class="camera-live-hint">Capture a photo directly using your device's full-screen camera.</p>
-                <div id="camera-area" class="drop-zone" style="cursor: default; pointer-events: none; margin-bottom: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 250px; padding: 1.5rem;">
+                <div id="camera-area" class="drop-zone native-camera-area">
                     <!-- Preview Mode -->
-                    <div id="native-camera-preview" style="display:none; width:100%; height:100%; flex-direction:column; align-items:center;">
-                        <img id="native-camera-img" style="max-width:100%; max-height:220px; border-radius:0.75rem; object-fit:contain; box-shadow: 0 4px 12px rgba(0,0,0,0.1); pointer-events: auto;" />
-                        <a href="#" onclick="clearNativeCamera(event)" style="color:var(--danger-color); font-size:0.9rem; font-weight:600; margin-top:12px; pointer-events: auto;"><i class="fas fa-times" style="margin-right:0.25rem;"></i> Remove Photo</a>
+                    <div id="native-camera-preview" class="native-preview-wrapper">
+                        <img id="native-camera-img" class="native-preview-img" />
+                        <a href="#" onclick="clearNativeCamera(event)" class="native-remove-btn"><i class="fas fa-times icon-mr"></i> Remove Photo</a>
                     </div>
                     <!-- Placeholder Mode -->
-                    <div id="native-camera-placeholder" style="text-align:center;">
-                        <div class="drop-zone-icon" style="margin: 0 auto 1rem;"><i class="fas fa-camera"></i></div>
-                        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--primary-color);">No Photo Captured Yet</h3>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Tap the button below to take a picture of the vehicle damage.</p>
+                    <div id="native-camera-placeholder" class="native-placeholder">
+                        <div class="drop-zone-icon native-placeholder-icon"><i class="fas fa-camera"></i></div>
+                        <h3 class="native-placeholder-title">No Photo Captured Yet</h3>
+                        <p class="native-placeholder-text">Tap the button below to take a picture of the vehicle damage.</p>
                     </div>
                 </div>
                 
                 <input type="file" id="native-camera-input" accept="image/*" capture="environment" hidden>
                 
                 <div class="camera-controls">
-                    <button type="button" class="cam-btn cam-btn-primary" style="width: 100%; display: flex; justify-content: center; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 1rem; background: var(--primary-color); color: white; border: none; cursor: pointer; align-items: center; gap: 8px;" onclick="document.getElementById('native-camera-input').click()">
+                    <button type="button" class="cam-btn native-open-btn" onclick="document.getElementById('native-camera-input').click()">
                         <i class="fas fa-camera"></i> Open Full Camera
                     </button>
                 </div>
                 
-                <div class="error-card" id="camera-error-card" style="margin-top:1rem;"></div>
-                <button type="button" class="analyze-btn" id="camera-analyze-btn" style="display:none; margin-top: 1rem; width: 100%; justify-content: center; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 1rem; background: #10b981; color: white; border: none; cursor: pointer; align-items: center; gap: 8px;" onclick="submitNativeCapture()">
+                <div class="error-card native-error" id="camera-error-card"></div>
+                <button type="button" class="analyze-btn native-analyze-btn" id="camera-analyze-btn" onclick="submitNativeCapture()">
                     <i class="fas fa-search"></i> Analyze captured photo
                 </button>
             </div>

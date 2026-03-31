@@ -27,12 +27,12 @@ $is_auth = is_logged_in();
             <p>Professional AI-powered vehicle inspection. Get accurate, instant damage assessment with state-of-the-art computer vision.</p>
             <div class="hero-buttons">
                 <?php if ($is_auth): ?>
-                <a href="analyze.php" class="submit-btn" style="width: auto; padding: 1rem 2.5rem;">
-                    <i class="fas fa-play-circle" style="margin-right: 0.5rem;"></i> Start Analysis
+                <a href="analyze.php" class="submit-btn hero-btn-override">
+                    <i class="fas fa-play-circle icon-mr"></i> Start Analysis
                 </a>
                 <?php else: ?>
-                <a href="login.php" class="submit-btn" style="width: auto; padding: 1rem 2.5rem;">
-                    <i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i> Sign In to Start
+                <a href="login.php" class="submit-btn hero-btn-override">
+                    <i class="fas fa-sign-in-alt icon-mr"></i> Sign In to Start
                 </a>
                 <?php endif; ?>
             </div>
@@ -58,7 +58,7 @@ $is_auth = is_logged_in();
     <section class="features" id="features">
         <div class="container">
             <div class="section-title animate-on-scroll">
-                <span class="section-tag" style="display: none;">✨ Features</span>
+                <span class="section-tag hidden-tag">✨ Features</span>
                 <h2>Why Choose AutoDamg?</h2>
                 <p>Powered by state-of-the-art YOLOv8 computer vision technology for accurate, instant damage assessment.</p>
             </div>
@@ -119,7 +119,7 @@ $is_auth = is_logged_in();
     <section class="how-it-works" id="how-it-works">
         <div class="container">
             <div class="section-title animate-on-scroll">
-                <span class="section-tag" style="display: none;">📋 Process</span>
+                <span class="section-tag hidden-tag">📋 Process</span>
                 <h2>How It Works</h2>
                 <p>Three simple steps to get your vehicle damage assessment.</p>
             </div>
@@ -174,7 +174,7 @@ $is_auth = is_logged_in();
             <div class="footer-content">
                 <div class="footer-column">
                     <h3><i class="fas fa-car-crash"></i> AutoDamg</h3>
-                    <p style="margin-top: 1rem;">AI-powered vehicle damage detection using advanced computer vision technology. Fast, accurate, and easy to use.</p>
+                    <p class="footer-desc">AI-powered vehicle damage detection using advanced computer vision technology. Fast, accurate, and easy to use.</p>
                     <div class="social-links">
                         <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
                         <a href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
@@ -213,7 +213,7 @@ $is_auth = is_logged_in();
 
             <div class="copyright">
                 <p>&copy; 2026 AutoDamg. All rights reserved. | Developed by Debba Mohamed Cherif </p>
-                <p style="margin-top: 0.5rem; color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">Empowering the future of vehicle analysis.</p>
+                <p class="copyright-desc">Empowering the future of vehicle analysis.</p>
             </div>
         </div>
     </footer>

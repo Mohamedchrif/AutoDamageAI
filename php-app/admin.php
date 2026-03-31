@@ -78,7 +78,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
                             <td data-label="User">
                                 <strong><?= htmlspecialchars($user['username']) ?></strong>
                                 <?php if ($isCurrentUser): ?>
-                                <span class="badge" style="background:#fef3c7;color:#92400e;margin-left:0.5rem;">You</span>
+                                <span class="badge badge-you">You</span>
                                 <?php endif; ?>
                             </td>
                             <td data-label="Email"><?= htmlspecialchars($user['email']) ?></td>
@@ -213,7 +213,7 @@ $adminCount = count(array_filter($users, fn($u) => $u['role'] === 'admin'));
             </select>
             <button type="button" id="filterApply"><i class="fas fa-filter"></i> Filter</button>
             <?php if ($search || $roleFilter || $blockedFilter): ?>
-            <a href="admin.php" class="action-btn" style="background:#f1f5f9;color:#475569;"><i class="fas fa-times"></i> Clear</a>
+            <a href="admin.php" class="action-btn btn-neutral"><i class="fas fa-times"></i> Clear</a>
             <?php endif; ?>
         </div>
         
@@ -224,7 +224,7 @@ $adminCount = count(array_filter($users, fn($u) => $u['role'] === 'admin'));
         </div>
 
         <!-- Users Table -->
-        <div style="overflow-x:auto;">
+        <div class="table-responsive-wrapper">
             <table class="users-table">
                 <thead>
                     <tr>
@@ -246,7 +246,7 @@ $adminCount = count(array_filter($users, fn($u) => $u['role'] === 'admin'));
                             <td data-label="User">
                                 <strong><?= htmlspecialchars($user['username']) ?></strong>
                                 <?php if ($isCurrentUser): ?>
-                                <span class="badge" style="background:#fef3c7;color:#92400e;margin-left:0.5rem;">You</span>
+                                <span class="badge badge-you">You</span>
                                 <?php endif; ?>
                             </td>
                             <td data-label="Email"><?= htmlspecialchars($user['email']) ?></td>
@@ -306,30 +306,30 @@ $adminCount = count(array_filter($users, fn($u) => $u['role'] === 'admin'));
                 <button class="modal-close" onclick="closeReportsModal()">&times;</button>
             </div>
             <div class="modal-body" id="reportsModalBody">
-                <div style="text-align:center;padding:2rem;">
+                <div class="modal-loading-wrapper">
                     <div class="loading-spinner"></div>
                     <p>Loading reports...</p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="action-btn" style="background:#f1f5f9;color:#475569;" onclick="closeReportsModal()">Close</button>
+                <button class="action-btn btn-neutral" onclick="closeReportsModal()">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Block Reason Modal -->
     <div class="modal" id="blockModal">
-        <div class="modal-content" style="max-width:500px;">
+        <div class="modal-content modal-content-lg">
             <div class="modal-header">
                 <h3 class="modal-title">Block User</h3>
                 <button class="modal-close" onclick="closeBlockModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <p>Provide a reason for blocking this user (optional):</p>
-                <textarea id="blockReason" rows="3" style="width:100%;padding:0.75rem;border:1px solid var(--border-color);border-radius:6px;margin-top:1rem;" placeholder="e.g., Violation of terms, spam, etc."></textarea>
+                <textarea id="blockReason" rows="3" class="block-reason-input" placeholder="e.g., Violation of terms, spam, etc."></textarea>
             </div>
             <div class="modal-footer">
-                <button class="action-btn" style="background:#f1f5f9;color:#475569;" onclick="closeBlockModal()">Cancel</button>
+                <button class="action-btn btn-neutral" onclick="closeBlockModal()">Cancel</button>
                 <button class="action-btn btn-block" onclick="confirmBlock()">Confirm Block</button>
             </div>
         </div>

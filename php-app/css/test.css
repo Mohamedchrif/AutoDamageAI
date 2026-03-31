@@ -1,0 +1,118 @@
+/* --- test.php specific layout and components styles --- */
+
+.upload-hint-text {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 0.75rem;
+}
+
+.remove-file-btn {
+    color: var(--danger-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.remove-file-btn i {
+    margin-right: 0.25rem;
+}
+
+.error-card-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Native Camera Capture Layouts */
+.native-camera-area {
+    cursor: default;
+    pointer-events: none;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
+    padding: 1.5rem;
+}
+
+.native-camera-preview {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+}
+
+.native-camera-img {
+    max-width: 100%;
+    max-height: 220px;
+    border-radius: 0.75rem;
+    object-fit: contain;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    pointer-events: auto;
+}
+
+.native-camera-remove {
+    color: var(--danger-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 12px;
+    pointer-events: auto;
+}
+.native-camera-remove i {
+    margin-right: 0.25rem;
+}
+
+.native-camera-placeholder {
+    text-align: center;
+}
+
+.placeholder-icon {
+    margin: 0 auto 1rem;
+}
+
+.placeholder-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.placeholder-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.full-camera-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    align-items: center;
+    gap: 8px;
+}
+
+.camera-error-card {
+    margin-top: 1rem;
+}
+
+.analyze-captured-btn {
+    display: none;
+    margin-top: 1rem;
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    cursor: pointer;
+    align-items: center;
+    gap: 8px;
+}

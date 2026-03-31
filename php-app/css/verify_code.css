@@ -151,6 +151,26 @@ body {
     border-color: #dcfce7;
 }
 
+/* --- Extracted inline styles --- */
+.verify-logo {
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+.back-to-login-wrapper {
+    margin-top: 1.5rem;
+}
+
+.back-to-login-link {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.back-to-login-icon {
+    font-size: 0.7rem;
+}
+
 @media (max-width: 576px) {
     .login-card {
         padding: 2rem 1.5rem;
