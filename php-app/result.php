@@ -116,7 +116,7 @@ $pdfPayload = [
                 The AI analysis found no signs of damage on this vehicle. It appears to be in excellent condition.
             </p>
             <div class="action-group">
-                <a href="index.php" class="btn-primary"><i class="fas fa-plus"></i> New Analysis</a>
+                <a href="analyze.php" class="btn-primary"><i class="fas fa-plus"></i> New Analysis</a>
                 <a href="dashboard.php" class="btn-outline"><i class="fas fa-th-large"></i> Dashboard</a>
             </div>
         </div>
@@ -208,7 +208,7 @@ $pdfPayload = [
                 </div>
             </div>
             <div class="cost-actions">
-                <a href="index.php"   class="btn-primary"><i class="fas fa-plus"></i> New Analysis</a>
+                <a href="analyze.php"   class="btn-primary"><i class="fas fa-plus"></i> New Analysis</a>
                 <a href="dashboard.php" class="btn-outline"><i class="fas fa-th-large"></i> Dashboard</a>
             </div>
         </div>
@@ -220,7 +220,7 @@ $pdfPayload = [
             <button onclick="downloadPDF()" class="btn-primary">
                 <i class="fas fa-file-pdf"></i> Download PDF Report
             </button>
-            <a href="index.php"     class="btn-outline"><i class="fas fa-plus"></i> Start New Analysis</a>
+            <a href="analyze.php"     class="btn-outline"><i class="fas fa-plus"></i> Start New Analysis</a>
             <a href="dashboard.php" class="btn-outline"><i class="fas fa-th-large"></i> Dashboard</a>
         </div>
 

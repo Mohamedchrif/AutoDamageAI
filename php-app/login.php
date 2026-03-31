@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="auth-content">
             <div class="login-card">
                 <div class="login-header">
-                    <a href="home.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
+                    <a href="index.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
                         <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
                     </a>
                     <h2>Welcome Back</h2>
@@ -105,6 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
-<script src="js/auth.js"></script>
+<script src="js/login.js"></script>
 </body>
 </html>

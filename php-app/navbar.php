@@ -15,7 +15,7 @@ $is_authenticated = is_logged_in();
 <!-- Global Navbar -->
 <header class="navbar" style="position: relative;">
     <div class="container header-content" style="width: 100%;">
-        <a href="home.php" class="nav-logo" style="color: var(--primary-color);">
+        <a href="index.php" class="nav-logo" style="color: var(--primary-color);">
             <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
         </a>
         
@@ -47,7 +47,7 @@ $is_authenticated = is_logged_in();
                     <?php endif; ?>
 
                     <li>
-                        <a href="index.php" class="<?= ($current_page === 'index.php' || $current_page === 'result.php') ? 'active' : '' ?>">
+                        <a href="analyze.php" class="<?= ($current_page === 'analyze.php' || $current_page === 'result.php') ? 'active' : '' ?>">
                             <i class="fas fa-plus"></i> New Analysis
                         </a>
                     </li>
@@ -66,8 +66,8 @@ $is_authenticated = is_logged_in();
 
                 <?php else: ?>
                     <!-- Guest Navigation (for Home Page) -->
-                    <li><a href="home.php#features">Features</a></li>
-                    <li><a href="home.php#how-it-works">How It Works</a></li>
+                    <li><a href="index.php#features">Features</a></li>
+                    <li><a href="index.php#how-it-works">How It Works</a></li>
                     <li><a href="login.php" class="<?= $current_page === 'login.php' ? 'active' : '' ?>">Login</a></li>
                     <li><a href="signup.php" class="nav-cta <?= $current_page === 'signup.php' ? 'active' : '' ?>">Sign Up</a></li>
                 <?php endif; ?>

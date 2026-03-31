@@ -11,7 +11,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
         switch ($action) {
             case 'toggle_block':
                 $userId = (int)($_POST['user_id'] ?? 0);
-                $blocked = (bool)($_POST['blocked'] ?? false);
+                $blocked = filter_var($_POST['blocked'] ?? false, FILTER_VALIDATE_BOOLEAN);
                 $reason = trim($_POST['reason'] ?? '');
                 
                 if (!$userId || $userId === $_SESSION['user_id']) {
@@ -75,43 +75,45 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
                         $isBlocked = (bool)$user['blocked'];
                 ?>
                         <tr>
-                            <td>
+                            <td data-label="User">
                                 <strong><?= htmlspecialchars($user['username']) ?></strong>
                                 <?php if ($isCurrentUser): ?>
                                 <span class="badge" style="background:#fef3c7;color:#92400e;margin-left:0.5rem;">You</span>
                                 <?php endif; ?>
                             </td>
-                            <td><?= htmlspecialchars($user['email']) ?></td>
-                            <td>
+                            <td data-label="Email"><?= htmlspecialchars($user['email']) ?></td>
+                            <td data-label="Role">
                                 <span class="badge badge-role-<?= $user['role'] ?>">
                                     <i class="fas fa-<?= $user['role'] === 'admin' ? 'crown' : 'user' ?>"></i>
                                     <?= ucfirst($user['role']) ?>
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <?php if ($isBlocked): ?>
                                     <span class="badge badge-blocked"><i class="fas fa-ban"></i> Blocked</span>
                                 <?php else: ?>
                                     <span class="badge badge-active"><i class="fas fa-check"></i> Active</span>
                                 <?php endif; ?>
                             </td>
-                            <td><?= date('M d, Y', strtotime($user['created_at'])) ?></td>
-                            <td>
-                                <?php if (!$isCurrentUser): ?>
-                                    <button class="action-btn btn-<?= $isBlocked ? 'unblock' : 'block' ?>" 
-                                            onclick="toggleBlock(<?= $user['id'] ?>, <?= $isBlocked ? 'false' : 'true' ?>)">
-                                        <i class="fas fa-<?= $isBlocked ? 'unlock' : 'ban' ?>"></i>
-                                        <?= $isBlocked ? 'Unblock' : 'Block' ?>
+                            <td data-label="Joined"><?= date('M d, Y', strtotime($user['created_at'])) ?></td>
+                            <td data-label="Actions">
+                                <div class="actions-wrapper">
+                                    <button class="action-btn btn-reports" onclick="viewReports(<?= $user['id'] ?>)">
+                                        <i class="fas fa-file-alt"></i> Reports
                                     </button>
-                                    <button class="action-btn btn-role" 
-                                            onclick="updateRole(<?= $user['id'] ?>, '<?= $user['role'] === 'admin' ? 'user' : 'admin' ?>')">
-                                        <i class="fas fa-exchange-alt"></i>
-                                        Make <?= $user['role'] === 'admin' ? 'User' : 'Admin' ?>
-                                    </button>
-                                <?php endif; ?>
-                                <button class="action-btn btn-reports" onclick="viewReports(<?= $user['id'] ?>)">
-                                    <i class="fas fa-file-alt"></i> Reports
-                                </button>
+                                    <?php if (!$isCurrentUser): ?>
+                                        <button class="action-btn btn-role" 
+                                                onclick="updateRole(<?= $user['id'] ?>, '<?= $user['role'] === 'admin' ? 'user' : 'admin' ?>')">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            Make <?= $user['role'] === 'admin' ? 'User' : 'Admin' ?>
+                                        </button>
+                                        <button class="action-btn btn-<?= $isBlocked ? 'unblock' : 'block' ?>" 
+                                                onclick="toggleBlock(<?= $user['id'] ?>, <?= $isBlocked ? 'false' : 'true' ?>)">
+                                            <i class="fas fa-<?= $isBlocked ? 'unlock' : 'ban' ?>"></i>
+                                            <?= $isBlocked ? 'Unblock' : 'Block' ?>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                 <?php 
@@ -241,43 +243,45 @@ $adminCount = count(array_filter($users, fn($u) => $u['role'] === 'admin'));
                             $isBlocked = (bool)$user['blocked'];
                         ?>
                         <tr>
-                            <td>
+                            <td data-label="User">
                                 <strong><?= htmlspecialchars($user['username']) ?></strong>
                                 <?php if ($isCurrentUser): ?>
                                 <span class="badge" style="background:#fef3c7;color:#92400e;margin-left:0.5rem;">You</span>
                                 <?php endif; ?>
                             </td>
-                            <td><?= htmlspecialchars($user['email']) ?></td>
-                            <td>
+                            <td data-label="Email"><?= htmlspecialchars($user['email']) ?></td>
+                            <td data-label="Role">
                                 <span class="badge badge-role-<?= $user['role'] ?>">
                                     <i class="fas fa-<?= $user['role'] === 'admin' ? 'crown' : 'user' ?>"></i>
                                     <?= ucfirst($user['role']) ?>
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <?php if ($isBlocked): ?>
                                     <span class="badge badge-blocked"><i class="fas fa-ban"></i> Blocked</span>
                                 <?php else: ?>
                                     <span class="badge badge-active"><i class="fas fa-check"></i> Active</span>
                                 <?php endif; ?>
                             </td>
-                            <td><?= date('M d, Y', strtotime($user['created_at'])) ?></td>
-                            <td>
-                                <?php if (!$isCurrentUser): ?>
-                                    <button class="action-btn btn-<?= $isBlocked ? 'unblock' : 'block' ?>" 
-                                            onclick="toggleBlock(<?= $user['id'] ?>, <?= $isBlocked ? 'false' : 'true' ?>)">
-                                        <i class="fas fa-<?= $isBlocked ? 'unlock' : 'ban' ?>"></i>
-                                        <?= $isBlocked ? 'Unblock' : 'Block' ?>
+                            <td data-label="Joined"><?= date('M d, Y', strtotime($user['created_at'])) ?></td>
+                            <td data-label="Actions">
+                                <div class="actions-wrapper">
+                                    <button class="action-btn btn-reports" onclick="viewReports(<?= $user['id'] ?>)">
+                                        <i class="fas fa-file-alt"></i> Reports
                                     </button>
-                                    <button class="action-btn btn-role" 
-                                            onclick="updateRole(<?= $user['id'] ?>, '<?= $user['role'] === 'admin' ? 'user' : 'admin' ?>')">
-                                        <i class="fas fa-exchange-alt"></i>
-                                        Make <?= $user['role'] === 'admin' ? 'User' : 'Admin' ?>
-                                    </button>
-                                <?php endif; ?>
-                                <button class="action-btn btn-reports" onclick="viewReports(<?= $user['id'] ?>)">
-                                    <i class="fas fa-file-alt"></i> Reports
-                                </button>
+                                    <?php if (!$isCurrentUser): ?>
+                                        <button class="action-btn btn-role" 
+                                                onclick="updateRole(<?= $user['id'] ?>, '<?= $user['role'] === 'admin' ? 'user' : 'admin' ?>')">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            Make <?= $user['role'] === 'admin' ? 'User' : 'Admin' ?>
+                                        </button>
+                                        <button class="action-btn btn-<?= $isBlocked ? 'unblock' : 'block' ?>" 
+                                                onclick="toggleBlock(<?= $user['id'] ?>, <?= $isBlocked ? 'false' : 'true' ?>)">
+                                            <i class="fas fa-<?= $isBlocked ? 'unlock' : 'ban' ?>"></i>
+                                            <?= $isBlocked ? 'Unblock' : 'Block' ?>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>

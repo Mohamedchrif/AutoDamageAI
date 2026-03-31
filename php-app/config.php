@@ -123,16 +123,34 @@ function set_flash_message(string $category, string $message): void {
     $_SESSION['flash_messages'][] = ['category' => $category, 'message' => $message];
 }
 
-function display_flash_messages(): void {
+function display_flash_messages(?string $filter = null): void {
     if (!empty($_SESSION['flash_messages'])) {
-        echo '<div class="flash-messages">';
-        foreach ($_SESSION['flash_messages'] as $flash) {
-            $cat = htmlspecialchars($flash['category']);
+        $found = false;
+        $html = '<div class="flash-messages">';
+        foreach ($_SESSION['flash_messages'] as $key => $flash) {
+            $cat = $flash['category'];
+
+            // Handle filtering
+            if ($filter !== null) {
+                if ($filter === 'password_inline') {
+                    if (strpos($cat, 'password_') !== 0) continue;
+                } elseif ($cat !== $filter) {
+                    continue;
+                }
+            } else {
+                // If main display (filter null), exclude all 'password_' ones
+                if (strpos($cat, 'password_') === 0) continue;
+            }
+
             $msg = htmlspecialchars($flash['message']);
-            echo "<div class=\"alert alert-{$cat}\">{$msg}</div>";
+            // Map specific categories to base alert types for CSS (e.g. password_danger -> danger)
+            $cssCat = str_replace(['password_danger', 'password_success'], ['danger', 'success'], $cat);
+            $html .= "<div class=\"alert alert-" . htmlspecialchars($cssCat) . "\">{$msg}</div>";
+            unset($_SESSION['flash_messages'][$key]);
+            $found = true;
         }
-        echo '</div>';
-        unset($_SESSION['flash_messages']);
+        $html .= '</div>';
+        if ($found) echo $html;
     }
 }
 

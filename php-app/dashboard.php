@@ -61,6 +61,7 @@ unset($a);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
     <div class="page-wrapper">
@@ -72,7 +73,7 @@ unset($a);
                     <h1 style="margin: 0; font-size: 2.25rem; font-weight: 800; color: var(--primary-color);">Welcome Back, <span style="color: var(--secondary-color);"><?= htmlspecialchars($user['username']) ?></span></h1>
                     <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 1.05rem;">Review your latest vehicle inspection matches and history.</p>
                 </div>
-                <a href="index.php" class="submit-btn" style="margin: 0; width: auto; padding: 0.8rem 1.75rem; text-decoration: none; display: flex; align-items: center; gap: 0.6rem; border-radius: 0.75rem;">
+                <a href="analyze.php" class="submit-btn" style="margin: 0; width: auto; padding: 0.8rem 1.75rem; text-decoration: none; display: flex; align-items: center; gap: 0.6rem; border-radius: 0.75rem;">
                     <i class="fas fa-plus-circle"></i> New Analysis
                 </a>
             </header>
@@ -155,7 +156,7 @@ unset($a);
                                         </div>
                                         <h3 style="color: var(--text-secondary); margin-bottom: 0.5rem;">No History Found</h3>
                                         <p style="color: var(--text-secondary); font-size: 0.875rem;">Your analyzed vehicle photos will appear here.</p>
-                                        <a href="index.php" class="submit-btn" style="width: auto; display: inline-flex; margin-top: 1.5rem; text-decoration: none; padding: 0.8rem 2rem; border-radius: 0.75rem;">Start First Analysis</a>
+                                        <a href="analyze.php" class="submit-btn" style="width: auto; display: inline-flex; margin-top: 1.5rem; text-decoration: none; padding: 0.8rem 2rem; border-radius: 0.75rem;">Start First Analysis</a>
                                     </td>
                                 </tr>
                             <?php endif; ?>
@@ -184,5 +185,6 @@ unset($a);
         </main>
     </div>
     <script src="js/nav.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 </html>

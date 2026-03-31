@@ -3,6 +3,7 @@ require_once 'config.php';
 require_login();
 
 $user = get_current_user_data($pdo);
+$show_edit = isset($_GET['edit']) && $_GET['edit'] == '1';
 
 if (isset($_POST['delete_account'])) {
     $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
@@ -39,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['avatar_only'] ?? '') === '
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account']) && !isset($_POST['change_password'])) {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
@@ -88,7 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete_account'])) {
                         $user = get_current_user_data($pdo); // Refresh data
                     } catch (Exception $e) {
                         set_flash_message('danger', 'An error occurred while updating your profile.');
+                        header("Location: profile.php?edit=1");
+                        exit;
                     }
+                } else {
+                    header("Location: profile.php?edit=1");
+                    exit;
                 }
             }
         }
@@ -113,18 +119,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                 $hash = password_hash($new_pwd, PASSWORD_DEFAULT);
                 $update_stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
                 if ($update_stmt->execute([$hash, $_SESSION['user_id']])) {
-                    set_flash_message('success', 'Your password has been successfully changed! Security score increased.');
+                    set_flash_message('password_success', 'Your password has been successfully changed! Security score increased.');
+                    header("Location: profile.php?edit=1#password-section");
+                    exit;
                 } else {
-                    set_flash_message('danger', 'System error occurred while updating the password.');
+                    set_flash_message('password_danger', 'System error occurred while updating the password.');
+                    header("Location: profile.php?edit=1#password-section");
+                    exit;
                 }
             } else {
-                set_flash_message('danger', 'The new password must be at least 8 characters long.');
+                set_flash_message('password_danger', 'The new password must be at least 8 characters long.');
+                header("Location: profile.php?edit=1#password-section");
+                exit;
             }
         } else {
-            set_flash_message('danger', 'New passwords do not match!');
+            set_flash_message('password_danger', 'New passwords do not match!');
+            header("Location: profile.php?edit=1#password-section");
+            exit;
         }
     } else {
-        set_flash_message('danger', 'Current password is incorrect! Action blocked.');
+        set_flash_message('password_danger', 'Current password is incorrect! Action blocked.');
+        header("Location: profile.php?edit=1#password-section");
+        exit;
     }
     header("Location: profile.php");
     exit;
@@ -188,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 
                 <div class="profile-content">
                     <!-- Static Profile Info -->
-                    <div id="profile-view">
+                    <div id="profile-view" style="<?= $show_edit ? 'display: none;' : '' ?>">
                         <div class="profile-header-view">
                             <div>
                                 <h2 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: var(--primary-color);"><?= htmlspecialchars($user['username']) ?></h2>
@@ -251,12 +267,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                     </div>
 
                     <!-- Edit Profile Form (Hidden by default) -->
-                    <div id="profile-edit" style="display: none; animation: fadeIn 0.3s ease;">
+                    <div id="profile-edit" style="<?= $show_edit ? 'display: block;' : 'display: none;' ?> animation: fadeIn 0.3s ease;">
                         <style>
                             @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
                             .edit-actions { display: flex; gap: 1rem; margin-top: 3rem; }
                             .btn-cancel { background: white; border: 2px solid var(--border-color); color: var(--text-secondary); border-radius: 0.75rem; padding: 0.8rem 1.75rem; cursor: pointer; font-weight: 700; transition: all 0.2s; font-size: 0.95rem; }
                             .btn-cancel:hover { background: #f8fafc; color: var(--primary-color); border-color: #cbd5e1; }
+                            .toggle-password { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-secondary); padding: 0; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: color 0.2s; z-index: 10; }
+                            .toggle-password:hover { color: var(--secondary-color); }
                         </style>
                         <div style="margin-bottom: 2.5rem;">
                             <h2 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: var(--primary-color);">Edit Profile Details</h2>
@@ -299,7 +317,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 
                         <hr style="margin: 3.5rem 0 2.5rem 0; border: none; border-top: 2px dashed #e2e8f0;">
 
-                        <div style="margin-bottom: 2rem;">
+                        <div id="password-section" style="margin-bottom: 2rem;">
                             <h2 style="margin: 0; font-size: 1.65rem; font-weight: 800; color: var(--primary-color); display: flex; align-items: center; gap: 0.75rem;">
                                 <i class="fas fa-key" style="color: var(--secondary-color);"></i> Change Password
                             </h2>
@@ -309,12 +327,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                         <form action="profile.php" method="POST">
                             <input type="hidden" name="change_password" value="1">
                             
+                            <?php display_flash_messages('password_inline'); ?>
+                            
                             <div class="profile-edit-grid" style="margin-bottom: 1.5rem;">
                                 <div class="form-group" style="grid-column: 1 / -1;">
                                     <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Current Password</label>
                                     <div class="input-with-icon" style="position: relative;">
                                         <i class="fas fa-lock" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="password" name="current_password" class="form-input" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                        <input type="password" id="current_password" name="current_password" class="form-input" style="width: 100%; padding: 0.875rem 3rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                        <button type="button" class="toggle-password" onclick="togglePassword('current_password', this)" title="Toggle visibility"><i class="fas fa-eye"></i></button>
                                     </div>
                                 </div>
                                 
@@ -322,14 +343,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                                     <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">New Password</label>
                                     <div class="input-with-icon" style="position: relative;">
                                         <i class="fas fa-shield-alt" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="password" name="new_password" class="form-input" minlength="8" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                        <input type="password" id="new_password" name="new_password" class="form-input" minlength="8" style="width: 100%; padding: 0.875rem 3rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                        <button type="button" class="toggle-password" onclick="togglePassword('new_password', this)" title="Toggle visibility"><i class="fas fa-eye"></i></button>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label" style="font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem; display: block;">Confirm New Password</label>
                                     <div class="input-with-icon" style="position: relative;">
                                         <i class="fas fa-check" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
-                                        <input type="password" name="confirm_password" class="form-input" minlength="8" style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                        <input type="password" id="confirm_password" name="confirm_password" class="form-input" minlength="8" style="width: 100%; padding: 0.875rem 3rem 0.875rem 2.75rem; border: 1px solid var(--border-color); border-radius: 0.75rem; font-size: 1rem; transition: all 0.2s; background: white;" required>
+                                        <button type="button" class="toggle-password" onclick="togglePassword('confirm_password', this)" title="Toggle visibility"><i class="fas fa-eye"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -382,6 +405,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 
 
     <script src="js/nav.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/profile.js"></script>
 </body>
 </html>

@@ -51,23 +51,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
     <title>AutoDamg | Reset Password</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/reset_password.css">
 </head>
 <body>
     <div class="auth-page">
+        <!-- Floating Decoration Elements -->
         <div class="decoration circle-1"></div>
         <div class="decoration circle-2"></div>
         
         <div class="auth-card">
             <div class="auth-header">
-                <a href="index.php" class="auth-logo"><i class="fas fa-car-crash"></i> AutoDamg</a>
-                <h1 class="auth-title">Create New Password</h1>
-                <p class="auth-subtitle">Your identity has been verified. Please enter your new secure password.</p>
+                <a href="index.php" class="auth-logo">
+                    <i class="fas fa-car-alt"></i>
+                    <span>AutoDamg</span>
+                </a>
+                <h1 class="auth-title">New Password</h1>
+                <p class="auth-subtitle">Great! We've verified your link. Now, choose a strong password to keep your account secure.</p>
             </div>
 
             <?php if(!empty($error)): ?>
                 <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle icon"></i> <?= htmlspecialchars($error) ?>
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span><?= htmlspecialchars($error) ?></span>
                 </div>
             <?php endif; ?>
 
@@ -76,23 +81,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
                     <label class="form-label">New Password</label>
                     <div class="input-with-icon">
                         <i class="fas fa-lock icon"></i>
-                        <input type="password" name="password" class="form-input" placeholder="At least 8 characters" minlength="8" required>
+                        <input type="password" name="password" class="form-input" placeholder="Min. 8 characters" minlength="8" required>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Confirm New Password</label>
+                    <label class="form-label">Confirm Password</label>
                     <div class="input-with-icon">
-                        <i class="fas fa-check icon"></i>
-                        <input type="password" name="confirm" class="form-input" placeholder="Re-enter password" minlength="8" required>
+                        <i class="fas fa-shield-alt icon"></i>
+                        <input type="password" name="confirm" class="form-input" placeholder="Repeat password" minlength="8" required>
                     </div>
                 </div>
 
-                <button type="submit" class="auth-btn" style="margin-top: 1rem;">
-                    <i class="fas fa-save"></i> Save New Password
+                <button type="submit" class="auth-btn">
+                    <span>Reset Securely</span>
+                    <i class="fas fa-check-circle"></i>
                 </button>
             </form>
         </div>
     </div>
+    <script src="js/reset_password.js"></script>
 </body>
 </html>
