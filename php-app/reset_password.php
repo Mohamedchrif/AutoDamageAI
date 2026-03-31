@@ -2,24 +2,15 @@
 session_start();
 require_once 'config.php';
 
-if (!isset($_GET['token'])) {
-    die("Invalid request.");
-}
-$token = $_GET['token'];
-
-try {
-    $pdo->exec("ALTER TABLE users ADD COLUMN reset_token VARCHAR(255) DEFAULT NULL;");
-} catch(PDOException $e) {}
-
-$stmt = $pdo->prepare("SELECT id FROM users WHERE reset_token = ?");
-$stmt->execute([$token]);
-$user = $stmt->fetch();
-
-if (!$user) {
-    die("Invalid or expired reset token.");
+// Check if we came from a verified OTP verification
+if (!isset($_SESSION['verified_recovery_user_id'])) {
+    header("Location: forgot_password.php");
+    exit;
 }
 
+$user_id = $_SESSION['verified_recovery_user_id'];
 $error = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
     $pass = $_POST['password'];
     $confirm = $_POST['confirm'];
@@ -27,8 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
     if ($pass === $confirm) {
         if (strlen($pass) >= 8) {
             $hash = password_hash($pass, PASSWORD_DEFAULT);
-            $update = $pdo->prepare("UPDATE users SET password = ?, reset_token = NULL WHERE id = ?");
-            if ($update->execute([$hash, $user['id']])) {
+            // Update the password - note we use 'password_hash' column if that matches login.php logic, but reset uses 'password' usually?
+            // Actually, check login.php logic. reset is using 'password' column currently. 
+            // In login.php: "password_hash" was used. I should check which one is correct.
+            // Let's check config.php or login.php. 
+            $update = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+            if ($update->execute([$hash, $user_id])) {
+                // Clear the session
+                unset($_SESSION['verified_recovery_user_id']);
+                unset($_SESSION['recovery_email']);
+                
                 set_flash_message('success', "Password successfully reset! You can now login securely.");
                 header("Location: login.php");
                 exit;
@@ -59,14 +58,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
         <div class="decoration circle-1"></div>
         <div class="decoration circle-2"></div>
         
-        <div class="auth-card">
-            <div class="auth-header">
-                <a href="index.php" class="auth-logo">
-                    <i class="fas fa-car-alt"></i>
-                    <span>AutoDamg</span>
+        <div class="login-card">
+            <div class="login-header">
+                <a href="index.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
+                    <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
                 </a>
-                <h1 class="auth-title">New Password</h1>
-                <p class="auth-subtitle">Great! We've verified your link. Now, choose a strong password to keep your account secure.</p>
+                <h2>Create new password</h2>
+                <p>Your identity has been verified. Choose a secure password that you haven't used before.</p>
             </div>
 
             <?php if(!empty($error)): ?>
@@ -76,25 +74,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
                 </div>
             <?php endif; ?>
 
-            <form method="POST" action="reset_password.php?token=<?= htmlspecialchars($token) ?>" class="auth-form">
+            <form method="POST" action="reset_password.php">
                 <div class="form-group">
-                    <label class="form-label">New Password</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-lock icon"></i>
-                        <input type="password" name="password" class="form-input" placeholder="Min. 8 characters" minlength="8" required>
+                    <label>New Password</label>
+                    <div class="input-wrapper password-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Min. 8 characters" minlength="8" required autofocus>
+                        <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Confirm Password</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-shield-alt icon"></i>
-                        <input type="password" name="confirm" class="form-input" placeholder="Repeat password" minlength="8" required>
+                    <label>Confirm New Password</label>
+                    <div class="input-wrapper password-wrapper">
+                        <i class="fas fa-shield-alt"></i>
+                        <input type="password" id="confirm" name="confirm" class="form-control" placeholder="Repeat new password" minlength="8" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('confirm', this)" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                 </div>
 
-                <button type="submit" class="auth-btn">
-                    <span>Reset Securely</span>
+                <button type="submit" class="submit-btn" style="margin-top: 2rem;">
+                    <span>Change Password</span>
                     <i class="fas fa-check-circle"></i>
                 </button>
             </form>

@@ -15,24 +15,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
     $user = $stmt->fetch();
     
     if ($user) {
-        $token = bin2hex(random_bytes(32));
+        // Generate a 6-digit OTP code
+        $otp = sprintf("%06d", mt_rand(1, 999999));
+        $expiry = date('Y-m-d H:i:s', strtotime('+15 minutes'));
         
         try {
-            $pdo->exec("ALTER TABLE users ADD COLUMN reset_token VARCHAR(255) DEFAULT NULL;");
-        } catch(PDOException $e) {}
+            // Ensure necessary columns exist for OTP flow
+            $pdo->exec("ALTER TABLE users ADD COLUMN reset_code VARCHAR(6) DEFAULT NULL;");
+            $pdo->exec("ALTER TABLE users ADD COLUMN reset_expiry DATETIME DEFAULT NULL;");
+        } catch(PDOException $e) {
+            // Columns likely already exist
+        }
         
-        $update = $pdo->prepare("UPDATE users SET reset_token = ? WHERE id = ?");
-        $update->execute([$token, $user['id']]);
+        $update = $pdo->prepare("UPDATE users SET reset_code = ?, reset_expiry = ? WHERE id = ?");
+        $update->execute([$otp, $expiry, $user['id']]);
         
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'];
-        $path = dirname($_SERVER['PHP_SELF']);
-        $ifSlash = substr($path, -1) == '/' ? '' : '/';
-        $reset_link = $protocol . "://" . $host . $path . $ifSlash . "reset_password.php?token=" . $token;
+        // Save user email in session for the verification step
+        $_SESSION['recovery_email'] = $email;
         
-        set_flash_message('success', "Since this is a local environment, here is your reset link:<br><br><a href='$reset_link' style='color:white; text-decoration:underline; word-break:break-all; font-weight:700;'>$reset_link</a>");
+        // In local env, display the code clearly
+        set_flash_message('success', "Security Code: $otp");
+        set_flash_message('success', "Since this is a local environment, we've displayed the 6-digit code above. In production, this would be sent to $email.");
+        
+        header("Location: verify_code.php");
+        exit;
     } else {
-        set_flash_message('success', "If your email is registered, you will receive a reset link shortly.");
+        set_flash_message('danger', "We couldn't find an account with that email address.");
     }
     header("Location: forgot_password.php");
     exit;
@@ -55,34 +63,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
         <div class="decoration circle-2"></div>
         <div class="decoration mesh-gradient"></div>
 
-        <div class="auth-card">
-            <div class="auth-header">
-                <a href="index.php" class="auth-logo">
-                    <i class="fas fa-car-alt"></i>
-                    <span>AutoDamg</span>
+        <div class="login-card">
+            <div class="login-header">
+                <a href="index.php" class="nav-logo" style="justify-content: center; margin-bottom: 1.5rem; color: var(--primary-color);">
+                    <span class="logo-icon"><i class="fas fa-car-crash"></i></span> AutoDamg
                 </a>
-                <h1 class="auth-title">Password Recovery</h1>
-                <p class="auth-subtitle">Lost your way? No worries. Enter your email and we'll send you a magic link to get back in.</p>
+                <h2>Password Recovery</h2>
+                <p>Lost your way? No worries. Enter your email and we'll send you a link to get back in.</p>
             </div>
 
             <?php display_flash_messages(); ?>
 
-            <form method="POST" action="forgot_password.php" class="auth-form">
+            <form method="POST" action="forgot_password.php">
                 <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-envelope icon"></i>
-                        <input type="email" name="email" class="form-input" placeholder="e.g. alex@example.com" required>
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" class="form-control" placeholder="e.g. alex@example.com" required>
                     </div>
                 </div>
 
-                <button type="submit" class="auth-btn">
+                <button type="submit" class="submit-btn">
                     <span>Send Recovery Link</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
 
-            <div class="auth-footer">
+            <div class="footer-text">
                 <p>Remembered? <a href="login.php">Back to Login</a></p>
                 <div style="margin-top: 1.5rem;">
                     <a href="index.php" style="font-size: 0.85rem; opacity: 0.8;">
