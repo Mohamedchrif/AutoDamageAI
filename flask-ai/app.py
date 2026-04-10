@@ -39,23 +39,23 @@ class_labels = [
 ]
 
 COST_MAP = {
-    'Bodypanel-Dent':          (150,  500),
-    'Front-Windscreen-Damage': (200,  600),
-    'Headlight-Damage':        (100,  400),
-    'Rear-windscreen-Damage':  (150,  500),
-    'RunningBoard-Dent':       (100,  300),
-    'Sidemirror-Damage':       (80,   250),
-    'Signlight-Damage':        (50,   150),
-    'Taillight-Damage':        (80,   250),
-    'bonnet-dent':             (200,  800),
-    'boot-dent':               (150,  600),
-    'doorouter-dent':          (200,  700),
-    'fender-dent':             (150,  500),
-    'front-bumper-dent':       (200,  600),
-    'pillar-dent':             (300, 1200),
-    'quaterpanel-dent':        (200,  700),
-    'rear-bumper-dent':        (150,  500),
-    'roof-dent':               (300, 1000),
+    'Bodypanel-Dent':          (20000,  67000),
+    'Front-Windscreen-Damage': (27000,  81000),
+    'Headlight-Damage':        (13500,  54000),
+    'Rear-windscreen-Damage':  (20000,  67000),
+    'RunningBoard-Dent':       (13500,  40000),
+    'Sidemirror-Damage':       (10000,  34000),
+    'Signlight-Damage':        (6500,   20000),
+    'Taillight-Damage':        (10000,  34000),
+    'bonnet-dent':             (27000, 108000),
+    'boot-dent':               (20000,  81000),
+    'doorouter-dent':          (27000,  95000),
+    'fender-dent':             (20000,  67000),
+    'front-bumper-dent':       (27000,  81000),
+    'pillar-dent':             (40000, 162000),
+    'quaterpanel-dent':        (27000,  95000),
+    'rear-bumper-dent':        (20000,  67000),
+    'roof-dent':               (40000, 135000),
 }
 
 # Severity colour map for annotations (BGR)
@@ -87,7 +87,7 @@ def analyze_damage_cv2(image_array: np.ndarray) -> list:
                     "moderate" if conf >= 0.6 else
                     "minor"
                 )
-                cost_min, cost_max = COST_MAP.get(label, (100, 400))
+                cost_min, cost_max = COST_MAP.get(label, (13500, 54000))
                 detected_issues.append({
                     "class":      label,
                     "confidence": round(conf, 3),

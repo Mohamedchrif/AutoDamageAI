@@ -153,7 +153,7 @@ async function downloadPDF() {
             }
             const cls = String(issue.class || '').substring(0, 42);
             const sev = String(issue.severity || '');
-            const cost = '$' + issue.cost_min + ' - $' + issue.cost_max;
+            const cost = issue.cost_min + ' - ' + issue.cost_max + ' DZD';
             doc.text(cls, margin + 1, y);
             doc.text(sev, margin + 75, y);
             doc.text(cost, pageW - margin - 1, y, { align: 'right' });
@@ -168,7 +168,7 @@ async function downloadPDF() {
     }
     doc.setFont('helvetica', 'bold');
     doc.text(
-        'Total Estimated Repair: $' + data.costMin + ' - $' + data.costMax,
+        'Total Estimated Repair: ' + data.costMin + ' - ' + data.costMax + ' DZD',
         pageW - margin,
         y,
         { align: 'right' }

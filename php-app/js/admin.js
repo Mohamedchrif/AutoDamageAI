@@ -115,7 +115,7 @@
                             </div>
                             <div class="report-stats">
                                 <span><i class="fas fa-search"></i> ${analysis.total_detections} detection${analysis.total_detections !== 1 ? 's' : ''}</span>
-                                <span class="report-cost">$${parseFloat(analysis.cost_min).toFixed(0)}–$${parseFloat(analysis.cost_max).toFixed(0)}</span>
+                                <span class="report-cost">${parseFloat(analysis.cost_min).toFixed(0)}–${parseFloat(analysis.cost_max).toFixed(0)} DZD</span>
                             </div>
                             <a href="result.php?id=${analysis.id}" class="report-link" target="_blank">
                                 <i class="fas fa-external-link-alt"></i> View Full Report

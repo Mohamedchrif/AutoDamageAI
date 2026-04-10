@@ -124,10 +124,10 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-icon kpi-green"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="kpi-icon kpi-green"><i class="fas fa-coins"></i></div>
                     <div class="kpi-details">
                         <h4>Avg Est. Repair Cost</h4>
-                        <div class="kpi-value">$<?= number_format($avg_cost) ?></div>
+                        <div class="kpi-value"><?= number_format($avg_cost) ?> DZD</div>
                     </div>
                 </div>
                 <div class="kpi-card">
@@ -179,11 +179,11 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
                     <div class="financial-stats">
                         <div class="financial-stat">
                             <p class="financial-stat-label">Total minimum estimated liability</p>
-                            <p class="financial-stat-value financial-stat-value--min">$<?= number_format($total_cost_min) ?></p>
+                            <p class="financial-stat-value financial-stat-value--min"><?= number_format($total_cost_min) ?> DZD</p>
                         </div>
                         <div class="financial-stat">
                             <p class="financial-stat-label">Total maximum estimated liability</p>
-                            <p class="financial-stat-value financial-stat-value--max">$<?= number_format($total_cost_max) ?></p>
+                            <p class="financial-stat-value financial-stat-value--max"><?= number_format($total_cost_max) ?> DZD</p>
                         </div>
                     </div>
                 </div>

@@ -186,7 +186,7 @@ $pdfPayload = [
                                 </span>
                                 <span class="breakdown-name"><?= htmlspecialchars($issue['class']) ?></span>
                             </div>
-                            <span class="breakdown-cost">$<?= $issue['cost_min'] ?>–$<?= $issue['cost_max'] ?></span>
+                            <span class="breakdown-cost"><?= $issue['cost_min'] ?>–<?= $issue['cost_max'] ?> DZD</span>
                         </div>
                         <?php endforeach; ?>
                     </div>
@@ -200,7 +200,7 @@ $pdfPayload = [
             <div>
                 <div class="cost-banner-label">💰 Estimated Repair Cost</div>
                 <div class="cost-range">
-                    $<span><?= $result['cost_min'] ?? 0 ?></span> – $<span><?= $result['cost_max'] ?? 0 ?></span>
+                    <span><?= $result['cost_min'] ?? 0 ?></span> – <span><?= $result['cost_max'] ?? 0 ?></span> DZD
                 </div>
                 <div class="cost-note">
                     Industry-based estimate for <?= $result['total_detections'] ?> detected issue<?= $result['total_detections'] != 1 ? 's' : '' ?>.
@@ -255,7 +255,7 @@ $pdfPayload = [
                     <tr>
                         <td><?= htmlspecialchars($issue['class']) ?></td>
                         <td class="pdf-sev-<?= $issue['severity'] ?>"><?= htmlspecialchars($issue['severity']) ?></td>
-                        <td class="pdf-text-right">$<?= $issue['cost_min'] ?> - $<?= $issue['cost_max'] ?></td>
+                        <td class="pdf-text-right"><?= $issue['cost_min'] ?> - <?= $issue['cost_max'] ?> DZD</td>
                     </tr>
                     <?php endforeach; ?>
                     <?php else: ?>
@@ -266,7 +266,7 @@ $pdfPayload = [
 
             <div class="pdf-total">
                 Total Estimated Repair Cost:
-                <span>$<?= $result['cost_min'] ?? 0 ?> - $<?= $result['cost_max'] ?? 0 ?></span>
+                <span><?= $result['cost_min'] ?? 0 ?> - <?= $result['cost_max'] ?? 0 ?> DZD</span>
             </div>
 
             <div class="pdf-footer">
