@@ -59,10 +59,10 @@
     font-size: 0.65rem;
 }
 
-/* Touch devices: subtle hint (no hover) */
+/* Touch devices: hide overlay until active */
 @media (hover: none) and (pointer: coarse) {
     .avatar-picker-overlay {
-        opacity: 0.4;
+        opacity: 0;
     }
     .avatar-picker-btn:active .avatar-picker-overlay {
         opacity: 1;
