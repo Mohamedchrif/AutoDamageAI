@@ -39,7 +39,7 @@ $is_auth = is_logged_in();
             
             <div class="hero-stats animate delay-3">
                 <div class="stat-item">
-                    <div class="stat-value">61%+</div>
+                    <div class="stat-value">86%+</div>
                     <div class="stat-label">Accuracy</div>
                 </div>
                 <div class="stat-item">
@@ -47,8 +47,8 @@ $is_auth = is_logged_in();
                     <div class="stat-label">Processing</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">16+</div>
-                    <div class="stat-label">Damage Types</div>
+                    <div class="stat-value">25+</div>
+                    <div class="stat-label">Classes Detected</div>
                 </div>
             </div>
         </div>
@@ -60,7 +60,7 @@ $is_auth = is_logged_in();
             <div class="section-title animate-on-scroll">
                 <span class="section-tag hidden-tag">✨ Features</span>
                 <h2>Why Choose AutoDamg?</h2>
-                <p>Powered by state-of-the-art YOLOv8 computer vision technology for accurate, instant damage assessment.</p>
+                <p>Powered by dual YOLO11m-seg computer vision technology for pixel-perfect vehicle parts mapping and damage assessment.</p>
             </div>
 
             <div class="features-grid">
@@ -76,7 +76,7 @@ $is_auth = is_logged_in();
                     <div class="feature-icon"><i class="fas fa-brain"></i></div>
                     <div class="feature-content">
                         <h3>AI-Powered Analysis</h3>
-                        <p>Advanced deep learning models detect 16+ types of damage with over 61% accuracy, trained on thousands of vehicle images.</p>
+                        <p>Dual YOLO11m-seg models precisely map 21 distinct vehicle parts and detect 4 damage types with up to 86.2% mAP accuracy.</p>
                     </div>
                 </div>
 
@@ -91,8 +91,8 @@ $is_auth = is_logged_in();
                 <div class="feature-card animate-on-scroll">
                     <div class="feature-icon"><i class="fas fa-crosshairs"></i></div>
                     <div class="feature-content">
-                        <h3>Precise Detection</h3>
-                        <p>Exact bounding boxes show damage location. Confidence scores and severity levels help prioritize repairs.</p>
+                        <h3>Precise Segmentation</h3>
+                        <p>Beyond bounding boxes, our Instance Segmentation provides pixel-perfect masks, ensuring we know exactly which car part is damaged.</p>
                     </div>
                 </div>
 
@@ -133,8 +133,8 @@ $is_auth = is_logged_in();
 
                 <div class="pipeline-step animate-on-scroll delay-1">
                     <div class="step-number">2</div>
-                    <h3 class="step-title"><i class="fas fa-brain"></i> AI Analysis</h3>
-                    <p class="step-description">Our YOLOv8 model processes the image and identifies all visible damage with confidence scores.</p>
+                    <h3 class="step-title"><i class="fas fa-brain"></i> Dual AI Analysis</h3>
+                    <p class="step-description">Our specialized dual YOLO11m-seg models simultaneously outline the vehicle structure and pinpoint exact damage locations.</p>
                 </div>
 
                 <div class="pipeline-step animate-on-scroll delay-2">
