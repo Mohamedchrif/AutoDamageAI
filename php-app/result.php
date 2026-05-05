@@ -42,7 +42,6 @@ if (isset($result['detected_issues'])) {
     }
 }
 
-// Absolute image URL for PDF export (jsPDF + fetch — avoids blank html2canvas output)
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
@@ -184,7 +183,10 @@ $pdfPayload = [
                                 <span class="status-badge status-<?= $issue['severity'] ?>">
                                     <?= htmlspecialchars($issue['severity']) ?>
                                 </span>
-                                <span class="breakdown-name"><?= htmlspecialchars($issue['class']) ?></span>
+                                <span class="breakdown-name">
+                                    <?= htmlspecialchars($issue['part'] ?? $issue['class']) ?>
+                                    — <?= htmlspecialchars($issue['class']) ?>
+                                </span>
                             </div>
                             <span class="breakdown-cost"><?= $issue['cost_min'] ?>–<?= $issue['cost_max'] ?> DZD</span>
                         </div>
@@ -194,6 +196,8 @@ $pdfPayload = [
                 </div>
             </div>
         </div>
+
+
 
         <!-- ── Cost Estimate Banner ───────────────────────────────────────── -->
         <div class="cost-banner">
@@ -227,23 +231,20 @@ $pdfPayload = [
     </div><!-- /.result-container -->
 
     <!-- ── Hidden PDF Layout ──────────────────────────────────────────────── -->
-    <div id="pdf-report-content"
-         class="pdf-hidden"
-         data-filename="<?= $filename ?>">
+    <div id="pdf-report-content" class="pdf-hidden" data-filename="<?= $filename ?>">
         <div class="pdf-header">
             <h1>AutoDamg Inspection Report</h1>
             <p>ID: <?= $filename ?> | Date: <?= date('Y-m-d') ?></p>
         </div>
-
         <div class="pdf-image-wrap">
             <img src="<?= $imgUrl($annotatedSrc) ?>" alt="Vehicle AI Analysis" class="pdf-image">
         </div>
-
         <div>
             <h2 class="pdf-section-title">Detected Damage Details</h2>
             <table class="pdf-table">
                 <thead>
                     <tr>
+                        <th>Part</th>
                         <th>Damage Type</th>
                         <th>Severity</th>
                         <th class="pdf-text-right">Cost Estimate</th>
@@ -253,22 +254,21 @@ $pdfPayload = [
                     <?php if (isset($result['detected_issues'])): ?>
                     <?php foreach ($result['detected_issues'] as $issue): ?>
                     <tr>
+                        <td><?= htmlspecialchars(str_replace('_', ' ', $issue['part'] ?? 'Unknown')) ?></td>
                         <td><?= htmlspecialchars($issue['class']) ?></td>
                         <td class="pdf-sev-<?= $issue['severity'] ?>"><?= htmlspecialchars($issue['severity']) ?></td>
                         <td class="pdf-text-right"><?= $issue['cost_min'] ?> - <?= $issue['cost_max'] ?> DZD</td>
                     </tr>
                     <?php endforeach; ?>
                     <?php else: ?>
-                    <tr><td colspan="3" class="pdf-no-damage-cell">No damage detected.</td></tr>
+                    <tr><td colspan="4" class="pdf-no-damage-cell">No damage detected.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
-
             <div class="pdf-total">
                 Total Estimated Repair Cost:
                 <span><?= $result['cost_min'] ?? 0 ?> - <?= $result['cost_max'] ?? 0 ?> DZD</span>
             </div>
-
             <div class="pdf-footer">
                 AutoDamg AI Assistant &bull; Estimates are purely AI-driven and should be verified by a certified mechanic.
             </div>
