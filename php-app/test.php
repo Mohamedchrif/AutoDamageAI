@@ -116,7 +116,7 @@ require_once 'config.php';
     <div class="trust-bar">
         <div class="trust-item"><i class="fas fa-shield-alt"></i> Secure & Private</div>
         <div class="trust-item"><i class="fas fa-bolt"></i> Results in Seconds</div>
-        <div class="trust-item"><i class="fas fa-robot"></i> YOLOv8 AI Model</div>
+        <div class="trust-item"><i class="fas fa-robot"></i> YOLO11 AI Model</div>
         <div class="trust-item"><i class="fas fa-dollar-sign"></i> Cost Estimation</div>
     </div>
 </div>
