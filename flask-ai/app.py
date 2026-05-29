@@ -37,7 +37,7 @@ COST_MAP = {
     'dent':        (8000,   40000),
     'glass_break': (10000,  60000),
     'scratch':     (3000,   20000),
-    'smash':       (20000, 100000),
+    'smash':       (20000, 50000),
 }
 
 # ── Annotation Colors Based on Severity (BGR) ────────────────
