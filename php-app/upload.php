@@ -120,8 +120,20 @@ $resultJson = json_encode([
     'annotated_image' => $annotatedStored,
     'original_dimensions' => $originalDimensions,
 ]);
+// Build lightweight summary: only class, severity, part (no images, no bboxes)
+$damageSummary = [];
+if (is_array($detectedIssues)) {
+    foreach ($detectedIssues as $issue) {
+        $damageSummary[] = [
+            'class'    => $issue['class'] ?? 'unknown',
+            'severity' => $issue['severity'] ?? 'minor',
+            'part'     => $issue['part'] ?? 'unknown',
+        ];
+    }
+}
+$damageSummaryJson = json_encode($damageSummary);
 
-if ($resultJson === false) {
+if ($resultJson === false || $damageSummaryJson === false) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Could not encode analysis result.']);
     exit;
@@ -131,9 +143,9 @@ if ($resultJson === false) {
 try {
     $stmt = $pdo->prepare("
         INSERT INTO analyses 
-            (user_id, filename, original_filename, file_size, result_json, annotated_image, cost_min, cost_max, total_detections, is_undamaged, timestamp) 
+            (user_id, filename, original_filename, file_size, result_json, annotated_image, cost_min, cost_max, total_detections, is_undamaged, damage_summary, timestamp) 
         VALUES 
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt->execute([
@@ -147,6 +159,7 @@ try {
         $costMax,                      // cost_max
         $totalDetections,              // total_detections
         (int)$isUndamaged,             // is_undamaged
+        $damageSummaryJson,            // damage_summary
         date('Y-m-d H:i:s')            // timestamp (added here)
     ]);
 

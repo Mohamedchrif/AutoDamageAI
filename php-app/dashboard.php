@@ -30,7 +30,13 @@ $total_analyses = $total_stmt->fetchColumn();
 $total_pages = ceil($total_analyses / $per_page);
 
 // Fetch recent analyses for the current user
-$stmt = $pdo->prepare("SELECT * FROM analyses WHERE user_id = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?");
+$stmt = $pdo->prepare("
+    SELECT id, filename, original_filename, file_size, cost_min, cost_max, total_detections, is_undamaged, timestamp 
+    FROM analyses 
+    WHERE user_id = ? 
+    ORDER BY timestamp DESC 
+    LIMIT ? OFFSET ?
+");
 $stmt->bindValue(1, $user['id'], PDO::PARAM_INT);
 $stmt->bindValue(2, $per_page, PDO::PARAM_INT);
 $stmt->bindValue(3, $offset, PDO::PARAM_INT);
@@ -40,14 +46,15 @@ $analyses = $stmt->fetchAll();
 // Process high severity count
 $high_count = 0;
 foreach ($analyses as &$a) {
-    if (!empty($a['result_json'])) {
-        $decoded = json_decode($a['result_json'], true);
-        $a['result'] = $decoded ? $decoded : ['total_detections' => 0];
-        if (isset($a['result']['total_detections']) && $a['result']['total_detections'] > 5) {
-            $high_count++;
-        }
-    } else {
-        $a['result'] = ['total_detections' => 0];
+    // Reconstruct lightweight result array for template compatibility
+    $a['result'] = [
+        'total_detections' => (int)($a['total_detections'] ?? 0),
+        'is_undamaged' => (bool)($a['is_undamaged'] ?? false),
+        'cost_min' => (float)($a['cost_min'] ?? 0),
+        'cost_max' => (float)($a['cost_max'] ?? 0),
+    ];
+    if ($a['result']['total_detections'] > 5) {
+        $high_count++;
     }
 }
 unset($a);

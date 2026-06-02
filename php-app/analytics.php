@@ -3,7 +3,13 @@ require_once 'config.php';
 require_admin();
 
 // All inspections system-wide (admin only)
-$analyses = $pdo->query("SELECT * FROM analyses ORDER BY timestamp DESC")->fetchAll();
+// Only fetch lightweight columns — avoid loading huge base64 images from result_json and annotated_image
+$analyses = $pdo->query("
+    SELECT id, timestamp, cost_min, cost_max, is_undamaged, total_detections,
+           damage_summary
+    FROM analyses 
+    ORDER BY timestamp DESC
+")->fetchAll();
 
 // -----------------------------------------
 // Data Aggregation Variables
@@ -31,46 +37,46 @@ foreach ($analyses as $a) {
         $timeline_data[$date]++;
     }
 
-    if (!empty($a['result_json'])) {
-        $result = json_decode($a['result_json'], true);
-        if (!$result) continue; // Skip invalid json
+    // Costs — use the dedicated columns directly (no need to parse JSON)
+    $total_cost_min += (float) ($a['cost_min'] ?? 0);
+    $total_cost_max += (float) ($a['cost_max'] ?? 0);
 
-        // Costs
-        $total_cost_min += $result['cost_min'] ?? 0;
-        $total_cost_max += $result['cost_max'] ?? 0;
+    // Severities and Damage Types — parse only the extracted damage_summary key
+    $issues = !empty($a['damage_summary']) ? json_decode($a['damage_summary'], true) : null;
 
-        // Severities and Damage Types
-        if (isset($result['detected_issues']) && is_array($result['detected_issues'])) {
-            if (count($result['detected_issues']) === 0) {
-                $clear_count++;
-            } else {
-                $max_severity_for_this_scan = 'clear';
-                
-                foreach ($result['detected_issues'] as $issue) {
-                    // Count specific damage classes (e.g., bumper_dent)
-                    $class = ucwords(str_replace('-', ' ', $issue['class']));
-                    if (!isset($damage_types[$class])) {
-                        $damage_types[$class] = 0;
-                    }
-                    $damage_types[$class]++;
-
-                    // Find worst severity for this specific car scan
-                    if ($issue['severity'] === 'major') {
-                        $max_severity_for_this_scan = 'major';
-                    } elseif ($issue['severity'] === 'moderate' && $max_severity_for_this_scan !== 'major') {
-                        $max_severity_for_this_scan = 'moderate';
-                    } elseif ($issue['severity'] === 'minor' && $max_severity_for_this_scan === 'clear') {
-                        $max_severity_for_this_scan = 'minor';
-                    }
-                }
-
-                if ($max_severity_for_this_scan === 'major') $high_severity_count++;
-                elseif ($max_severity_for_this_scan === 'moderate') $moderate_severity_count++;
-                elseif ($max_severity_for_this_scan === 'minor') $minor_severity_count++;
-            }
-        } else {
+    if (is_array($issues)) {
+        if (count($issues) === 0) {
             $clear_count++;
+        } else {
+            $max_severity_for_this_scan = 'clear';
+
+            foreach ($issues as $issue) {
+                // Count specific damage classes (e.g., bumper_dent)
+                $class = ucwords(str_replace('-', ' ', $issue['class']));
+                if (!isset($damage_types[$class])) {
+                    $damage_types[$class] = 0;
+                }
+                $damage_types[$class]++;
+
+                // Find worst severity for this specific car scan
+                if ($issue['severity'] === 'major') {
+                    $max_severity_for_this_scan = 'major';
+                } elseif ($issue['severity'] === 'moderate' && $max_severity_for_this_scan !== 'major') {
+                    $max_severity_for_this_scan = 'moderate';
+                } elseif ($issue['severity'] === 'minor' && $max_severity_for_this_scan === 'clear') {
+                    $max_severity_for_this_scan = 'minor';
+                }
+            }
+
+            if ($max_severity_for_this_scan === 'major')
+                $high_severity_count++;
+            elseif ($max_severity_for_this_scan === 'moderate')
+                $moderate_severity_count++;
+            elseif ($max_severity_for_this_scan === 'minor')
+                $minor_severity_count++;
         }
+    } else {
+        $clear_count++;
     }
 }
 
@@ -86,12 +92,15 @@ $avg_cost = $total_inspections > 0 ? (($total_cost_min + $total_cost_max) / 2) /
 $js_severity_data = json_encode([$high_severity_count, $moderate_severity_count, $minor_severity_count, $clear_count]);
 $js_damage_labels = json_encode(array_keys($top_damage_types));
 $js_damage_counts = json_encode(array_values($top_damage_types));
-$js_timeline_labels = json_encode(array_map(function($d) { return date('M d', strtotime($d)); }, array_keys($timeline_data)));
+$js_timeline_labels = json_encode(array_map(function ($d) {
+    return date('M d', strtotime($d));
+}, array_keys($timeline_data)));
 $js_timeline_counts = json_encode(array_values($timeline_data));
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -100,8 +109,9 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="css/analytics.css">
+    <link rel="stylesheet" href="css/analytics.css">
 </head>
+
 <body>
     <div class="page-wrapper">
         <?php include 'navbar.php'; ?>
@@ -147,7 +157,7 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
                     <div class="chart-container-inner">
                         <canvas id="severityChart"></canvas>
                         <?php if ($total_inspections == 0): ?>
-                        <div class="chart-empty-state">No data available</div>
+                            <div class="chart-empty-state">No data available</div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -166,7 +176,7 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
                     <div class="chart-container-inner chart-tall">
                         <canvas id="damageTypeChart"></canvas>
                         <?php if (empty($top_damage_types)): ?>
-                        <div class="chart-empty-state">No damages detected yet</div>
+                            <div class="chart-empty-state">No damages detected yet</div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -179,11 +189,15 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
                     <div class="financial-stats">
                         <div class="financial-stat">
                             <p class="financial-stat-label">Total minimum estimated liability</p>
-                            <p class="financial-stat-value financial-stat-value--min"><?= number_format($total_cost_min) ?> DZD</p>
+                            <p class="financial-stat-value financial-stat-value--min">
+                                
+                                <?= number_format($total_cost_min) ?> DZD</p>
                         </div>
                         <div class="financial-stat">
-                            <p class="financial-stat-label">Total maximum estimated liability</p>
-                            <p class="financial-stat-value financial-stat-value--max"><?= number_format($total_cost_max) ?> DZD</p>
+                            <p class="financial-stat-label">Total maximum estimated li
+                                ability</p>
+                            <p class="financial-stat-value financial-stat-value--max">
+                                <?= number_format($total_cost_max) ?> DZD</p>
                         </div>
                     </div>
                 </div>
@@ -205,4 +219,5 @@ $js_timeline_counts = json_encode(array_values($timeline_data));
     <script src="js/analytics.js"></script>
     <script src="js/nav.js"></script>
 </body>
+
 </html>

@@ -18,7 +18,7 @@ Navigate into the `php-app` directory and start a local PHP development server:
 cd php-app
 php -S 127.0.0.1:8000
 ```
-Your frontend is now available at `http://127.0.0.1:8000/home.php`.
+Your frontend is now available at `http://127.0.0.1:8000/index.php`.
 
 ### 3. Start the Flask AI Server (Backend API)
 Open a new terminal, navigate to the `flask-ai` directory, install requirements, and run the API:

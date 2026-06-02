@@ -11,7 +11,7 @@ if (isset($_POST['delete_account'])) {
         $stmt->execute([$_SESSION['user_id']]);
         session_unset();
         session_destroy();
-        header("Location: home.php");
+        header("Location: index.php");
         exit;
     } catch (Exception $e) {
         set_flash_message('danger', 'An error occurred. Please try again.');

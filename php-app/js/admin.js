@@ -98,9 +98,8 @@
                 let html = `<p style="margin-bottom:1rem;color:var(--text-secondary);">${data.count} report${data.count !== 1 ? 's' : ''} found</p>`;
                 
                 data.analyses.forEach(analysis => {
-                    const result = JSON.parse(analysis.result_json);
                     const date = new Date(analysis.timestamp).toLocaleString();
-                    const isUndamaged = analysis.is_undamaged || result.is_undamaged;
+                    const isUndamaged = analysis.is_undamaged == 1 || analysis.is_undamaged === true;
                     
                     html += `
                         <div class="report-item">

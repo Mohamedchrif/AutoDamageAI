@@ -229,7 +229,7 @@ function get_all_users(PDO $pdo, array $filters = []): array {
 
 function get_user_analyses(PDO $pdo, int $userId, int $limit = 50): array {
     $stmt = $pdo->prepare("
-        SELECT id, filename, original_filename, file_size, result_json, 
+        SELECT id, filename, original_filename, file_size, 
                cost_min, cost_max, total_detections, is_undamaged, timestamp
         FROM analyses 
         WHERE user_id = ? 
