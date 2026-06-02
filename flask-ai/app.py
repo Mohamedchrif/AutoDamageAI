@@ -46,6 +46,23 @@ SEVERITY_COLORS = {
     "moderate": (0,   165, 255),
     "minor":    (0,   255, 0),
 }
+def apply_clahe(image_array: np.ndarray, clip_limit: float = 2.0, tile_grid_size: tuple = (8, 8)) -> np.ndarray:
+    """Apply Contrast Limited Adaptive Histogram Equalization (CLAHE) to a BGR image."""
+    try:
+        # Convert from BGR to LAB color space
+        lab = cv2.cvtColor(image_array, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        
+        # Apply CLAHE to the L (lightness) channel
+        clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+        cl = clahe.apply(l)
+        
+        # Merge back and convert to BGR
+        limg = cv2.merge((cl, a, b))
+        return cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+    except Exception as e:
+        logger.warning(f"Failed to apply CLAHE: {str(e)}. Using original image.")
+        return image_array
 
 
 def extract_polygons(mask_array: np.ndarray) -> list:
@@ -416,12 +433,19 @@ def predict():
 
         h, w = image_array.shape[:2]
 
+        # ── Optional CLAHE Preprocessing ──────────────────────
+        use_clahe = request.form.get('use_clahe', 'true').lower() == 'true'
+        if use_clahe:
+            processed_image = apply_clahe(image_array)
+        else:
+            processed_image = image_array
+
         # ── Run the models ────────────────────────────────────
-        detected_issues, all_parts = analyze_damage_cv2(image_array)
+        detected_issues, all_parts = analyze_damage_cv2(processed_image)
         is_undamaged    = len(detected_issues) == 0
 
         # ── Draw annotations on the full image ────────────────
-        annotated     = draw_annotations(image_array, detected_issues, all_parts)
+        annotated     = draw_annotations(processed_image, detected_issues, all_parts)
         annotated_b64 = image_to_base64(annotated)
 
         # ── Calculate total estimated costs ───────────────────
